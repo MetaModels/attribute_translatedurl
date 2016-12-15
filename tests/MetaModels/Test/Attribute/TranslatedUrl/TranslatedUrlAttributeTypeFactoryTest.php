@@ -40,7 +40,7 @@ class TranslatedUrlAttributeTypeFactoryTest extends AttributeTypeFactoryTest
      *
      * @param string $fallbackLanguage The fallback language.
      *
-     * @return IMetaModel
+     * @return IMetaModel|\PHPUnit_Framework_MockObject_MockObject
      */
     protected function mockMetaModel($tableName, $language, $fallbackLanguage)
     {

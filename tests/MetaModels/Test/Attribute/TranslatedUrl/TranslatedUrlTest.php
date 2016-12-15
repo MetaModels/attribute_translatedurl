@@ -34,7 +34,7 @@ class TranslatedUrlTest extends \PHPUnit_Framework_TestCase
      * @param string $language         The language.
      * @param string $fallbackLanguage The fallback language.
      *
-     * @return IMetaModel
+     * @return IMetaModel|\PHPUnit_Framework_MockObject_MockObject
      */
     protected function mockMetaModel($language, $fallbackLanguage)
     {

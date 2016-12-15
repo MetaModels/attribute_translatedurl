@@ -121,7 +121,6 @@ class TranslatedUrl extends TranslatedReference
     /**
      * {@inheritdoc}
      */
-
     public function getFilterOptions($ids, $usedOnly, &$count = null)
     {
         // not supported
