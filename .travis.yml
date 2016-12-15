@@ -8,7 +8,7 @@ php:
   - "7.1"
 
 env:
-  - CONTAO_VERSION=~3.5.0
+  - CONTAO_VERSION=~3.5.5
 
 # Exclude impossible Contao Version combinations.
 matrix:
