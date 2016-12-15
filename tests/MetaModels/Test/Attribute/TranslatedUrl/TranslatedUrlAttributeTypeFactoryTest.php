@@ -45,7 +45,7 @@ class TranslatedUrlAttributeTypeFactoryTest extends AttributeTypeFactoryTest
     protected function mockMetaModel($tableName, $language, $fallbackLanguage)
     {
         $metaModel = $this->getMock(
-            'MetaModels\MetaModel',
+            'MetaModels\IMetaModel',
             array(),
             array(array())
         );
