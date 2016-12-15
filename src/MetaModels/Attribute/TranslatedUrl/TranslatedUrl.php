@@ -17,6 +17,7 @@
  * @author     Oliver Hoff <oliver@hofff.com>
  * @author     Andreas Isaak <info@andreas-isaak.de>
  * @author     Christopher Boelter <christopher@boelter.eu>
+ * @author     Ingolf Steinhardt <info@e-spin.de>
  * @copyright  2012-2016 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0
  * @filesource
@@ -211,15 +212,12 @@ class TranslatedUrl extends TranslatedReference
 
         $this->unsetValueFor(array_keys($values), $language);
 
-        $sql = sprintf(
-            'INSERT INTO %1$s (att_id, item_id, language, tstamp, href, title) VALUES %2$s',
-            $this->getValueTable(),
-            rtrim(str_repeat('(?,?,?,?,?,?),', count($values)), ',')
-        );
-
         $time   = time();
         $params = array();
         foreach ($values as $id => $value) {
+            if (!count(array_filter((array) $value))) {
+                continue;
+            }
             $params[] = $this->get('id');
             $params[] = $id;
             $params[] = $language;
@@ -228,7 +226,15 @@ class TranslatedUrl extends TranslatedReference
             $params[] = strlen($value['title']) ? $value['title'] : null;
         }
 
-        $this->getMetaModel()->getServiceContainer()->getDatabase()->prepare($sql)->execute($params);
+        $sql = sprintf(
+            'INSERT INTO %1$s (att_id, item_id, language, tstamp, href, title) VALUES %2$s',
+            $this->getValueTable(),
+            rtrim(str_repeat('(?,?,?,?,?,?),', (count($params) / 6)), ',')
+        );
+
+        if ($params) {
+            $this->getMetaModel()->getServiceContainer()->getDatabase()->prepare($sql)->execute($params);
+        }
     }
 
     /**
