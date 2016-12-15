@@ -42,7 +42,7 @@ class TranslatedUrl extends TranslatedReference
      */
     public function getFilterUrlValue($value)
     {
-        return htmlencode(serialize($value));
+        return urlencode(serialize($value));
     }
 
     /**
