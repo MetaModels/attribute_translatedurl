@@ -1,12 +1,15 @@
 <?php
 
+
 /**
- * The MetaModels extension allows the creation of multiple collections of custom items,
- * each with its own unique set of selectable attributes, with attribute extendability.
- * The Front-End modules allow you to build powerful listing and filtering of the
- * data in each collection.
+ * This file is part of MetaModels/attribute_translatedurl.
  *
- * PHP version 5
+ * (c) 2012-2016 The MetaModels team.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ *
+ * This project is provided in good faith and hope to be usable by anyone.
  *
  * @package    MetaModels
  * @subpackage AttributeTranslatedUrl
@@ -14,8 +17,10 @@
  * @author     Oliver Hoff <oliver@hofff.com>
  * @author     Andreas Isaak <info@andreas-isaak.de>
  * @author     Christopher Boelter <christopher@boelter.eu>
- * @copyright  The MetaModels team.
- * @license    LGPL.
+ * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @author     Sven Baumann <baumann.sv@gmail.com>
+ * @copyright  2012-2016 The MetaModels team.
+ * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
 
@@ -39,7 +44,7 @@ class TranslatedUrl extends TranslatedReference
      */
     public function getFilterUrlValue($value)
     {
-        return htmlencode(serialize($value));
+        return urlencode(serialize($value));
     }
 
     /**
@@ -118,7 +123,6 @@ class TranslatedUrl extends TranslatedReference
     /**
      * {@inheritdoc}
      */
-
     public function getFilterOptions($ids, $usedOnly, &$count = null)
     {
         // not supported
@@ -209,15 +213,12 @@ class TranslatedUrl extends TranslatedReference
 
         $this->unsetValueFor(array_keys($values), $language);
 
-        $sql = sprintf(
-            'INSERT INTO %1$s (att_id, item_id, language, tstamp, href, title) VALUES %2$s',
-            $this->getValueTable(),
-            rtrim(str_repeat('(?,?,?,?,?,?),', count($values)), ',')
-        );
-
         $time   = time();
         $params = array();
         foreach ($values as $id => $value) {
+            if (!count(array_filter((array) $value))) {
+                continue;
+            }
             $params[] = $this->get('id');
             $params[] = $id;
             $params[] = $language;
@@ -226,7 +227,15 @@ class TranslatedUrl extends TranslatedReference
             $params[] = strlen($value['title']) ? $value['title'] : null;
         }
 
-        $this->getMetaModel()->getServiceContainer()->getDatabase()->prepare($sql)->execute($params);
+        $sql = sprintf(
+            'INSERT INTO %1$s (att_id, item_id, language, tstamp, href, title) VALUES %2$s',
+            $this->getValueTable(),
+            rtrim(str_repeat('(?,?,?,?,?,?),', (count($params) / 6)), ',')
+        );
+
+        if ($params) {
+            $this->getMetaModel()->getServiceContainer()->getDatabase()->prepare($sql)->execute($params);
+        }
     }
 
     /**

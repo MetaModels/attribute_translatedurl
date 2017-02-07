@@ -21,32 +21,6 @@
  * @filesource
  */
 
-$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['translatedurl extends url'] = array();
-
-$GLOBALS['TL_DCA']['tl_metamodel_attribute']['dca_config']['data_provider']['tl_metamodel_translatedurl'] = array
-(
-    'source' => 'tl_metamodel_translatedurl'
-);
-
-$GLOBALS['TL_DCA']['tl_metamodel_attribute']['dca_config']['childCondition'][] = array
-(
-    'from'   => 'tl_metamodel_attribute',
-    'to'     => 'tl_metamodel_translatedurl',
-    'setOn'  => array
-    (
-        array
-        (
-            'to_field'   => 'att_id',
-            'from_field' => 'id',
-        ),
-    ),
-    'filter' => array
-    (
-        array
-        (
-            'local'     => 'att_id',
-            'remote'    => 'id',
-            'operation' => '=',
-        ),
-    )
-);
+// Let our handler handle the necessary steps.
+$handler = new MetaModels\Attribute\TranslatedUrl\Helper\UpgradeHandler(\Contao\Database::getInstance());
+$handler->perform();
