@@ -8,10 +8,10 @@
  *
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
  *
- * last-updated: 2015-07-11T08:04:02+02:00
+ * last-updated: 2015-09-18T10:35:05+02:00
  */
 
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['trim_title']['0']              = 'Titel entfernen';
-$GLOBALS['TL_LANG']['tl_metamodel_attribute']['trim_title']['1']              = 'Wenn ausgewählt wird  nur der Link-Eintrag benutzt.';
+$GLOBALS['TL_LANG']['tl_metamodel_attribute']['trim_title']['1']              = 'Wenn ausgewählt, wird nur der Link-Eintrag benutzt.';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['translatedurl'] = 'Übersetzte URL';
 
