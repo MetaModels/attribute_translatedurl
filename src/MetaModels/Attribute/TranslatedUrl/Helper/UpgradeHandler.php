@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2016 The MetaModels team.
+ * (c) 2012-2017 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,7 +13,8 @@
  * @package    MetaModels
  * @subpackage AttributeTranslatedUrl
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @copyright  2012-2016 The MetaModels team.
+ * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @copyright  2012-2017 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
@@ -63,6 +64,10 @@ class UpgradeHandler
      */
     private function ensureIndexNameAttIdLanguage()
     {
+        if (!($this->database->tableExists('tl_metamodel_translatedurl'))) {
+            return;
+        }
+
         // Renamed in 2.0.0-alpha2 (due to database.sql => dca movement).
         if (!$this->database->indexExists('att_lang', 'tl_metamodel_translatedurl', true)) {
             return;
@@ -82,6 +87,10 @@ class UpgradeHandler
      */
     private function ensureHrefDefaultsToNull()
     {
+        if (!($this->database->tableExists('tl_metamodel_translatedurl'))) {
+            return;
+        }
+
         foreach ($this->database->listFields('tl_metamodel_translatedurl', true) as $field) {
             if ('href' == $field['name'] && $field['type'] != 'index') {
                 // Already updated?
