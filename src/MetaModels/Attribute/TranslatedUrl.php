@@ -4,7 +4,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2016 The MetaModels team.
+ * (c) 2012-2018 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -19,16 +19,21 @@
  * @author     Christopher Boelter <christopher@boelter.eu>
  * @author     Ingolf Steinhardt <info@e-spin.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
- * @copyright  2012-2016 The MetaModels team.
+ * @author     David Molineus <david.molineus@netzmacht.de>
+ * @copyright  2012-2018 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
 
-namespace MetaModels\Attribute\TranslatedUrl;
+namespace MetaModels\AttributeTranslatedUrlBundle\Attribute;
 
+use Contao\System;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ManipulateWidgetEvent;
+use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\TranslatedReference;
-use MetaModels\DcGeneral\Events\UrlWizardHandler;
+use MetaModels\AttributeTranslatedUrlBundle\DcGeneral\Events\UrlWizardHandler;
+use MetaModels\IMetaModel;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Handle the translated url attribute.
@@ -38,6 +43,48 @@ use MetaModels\DcGeneral\Events\UrlWizardHandler;
  */
 class TranslatedUrl extends TranslatedReference
 {
+    /**
+     * Event dispatcher.
+     *
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    /**
+     * Instantiate an MetaModel attribute.
+     *
+     * Note that you should not use this directly but use the factory classes to instantiate attributes.
+     *
+     * @param IMetaModel               $objMetaModel    The MetaModel instance this attribute belongs to.
+     *
+     * @param array                    $arrData         The information array, for attribute information, refer to
+     *                                                  documentation of table tl_metamodel_attribute and documentation
+     *                                                  of the certain attribute classes for information what values
+     *                                                  are understood.
+     *
+     * @param Connection               $connection      Database connection.
+     *
+     * @param EventDispatcherInterface $eventDispatcher Event dispatcher.
+     */
+    public function __construct(
+        IMetaModel $objMetaModel,
+        array $arrData = [],
+        Connection $connection = null,
+        EventDispatcherInterface $eventDispatcher = null
+    ) {
+        parent::__construct($objMetaModel, $arrData, $connection);
+
+        if (null === $eventDispatcher) {
+            // @codingStandardsIgnoreStart
+            @trigger_error(
+                'Event dispatcher is missing. It has to be passed in the constructor. Fallback will be dropped.',
+                E_USER_DEPRECATED
+            );
+            // @codingStandardsIgnoreEnd
+            $eventDispatcher = System::getContainer()->get('event_dispatcher');
+        }
+        $this->eventDispatcher = $eventDispatcher;
+    }
 
     /**
      * {@inheritdoc}
@@ -111,8 +158,7 @@ class TranslatedUrl extends TranslatedReference
         }
 
         /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
-        $dispatcher = $this->getMetaModel()->getServiceContainer()->getEventDispatcher();
-        $dispatcher->addListener(
+        $this->eventDispatcher->addListener(
             ManipulateWidgetEvent::NAME,
             array(new UrlWizardHandler($this->getMetaModel(), $this->getColName()), 'getWizard')
         );
@@ -141,6 +187,7 @@ class TranslatedUrl extends TranslatedReference
         if ($languages) {
             $languageCondition = 'AND language IN (' . $this->parameterMask($languages) . ')';
         }
+
 
         $sql = sprintf(
             'SELECT DISTINCT item_id AS id FROM %1$s WHERE (title LIKE ? OR href LIKE ?) AND att_id = ?%2$s',
