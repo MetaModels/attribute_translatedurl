@@ -180,29 +180,23 @@ class TranslatedUrl extends TranslatedReference
      */
     public function searchForInLanguages($pattern, $languages = array())
     {
-        $pattern           = str_replace(array('*', '?'), array('%', '_'), $pattern);
-        $languageCondition = '';
+        $pattern = str_replace(array('*', '?'), array('%', '_'), $pattern);
+        $builder = $this->connection->createQueryBuilder()
+            ->select('item_id AS id')
+            ->from($this->getValueTable())
+            ->groupBy('item_id')
+            ->where('(title LIKE :pattern OR href LIKE :pattern)')
+            ->andWhere('att_id = :id')
+            ->setParameter('pattern', $pattern)
+            ->setParameter('id', $this->get('id'));
 
-        $languages = (array) $languages;
         if ($languages) {
-            $languageCondition = 'AND language IN (' . $this->parameterMask($languages) . ')';
+            $builder
+                ->andWhere('language IN :languages')
+                ->setParameter('languages', $languages, Connection::PARAM_STR_ARRAY);
         }
 
-
-        $sql = sprintf(
-            'SELECT DISTINCT item_id AS id FROM %1$s WHERE (title LIKE ? OR href LIKE ?) AND att_id = ?%2$s',
-            $this->getValueTable(),
-            $languageCondition
-        );
-
-        $params[] = $pattern;
-        $params[] = $pattern;
-        $params[] = $this->get('id');
-        $params   = array_merge($params, $languages);
-
-        $result = $this->getMetaModel()->getServiceContainer()->getDatabase()->prepare($sql)->execute($params);
-
-        return $result->fetchEach('id');
+        return $builder->execute()->fetchAll(\PDO::FETCH_COLUMN, 0);
     }
 
     /**
@@ -220,32 +214,34 @@ class TranslatedUrl extends TranslatedReference
             $direction = 'ASC';
         }
 
-        $sql = sprintf(
-            'SELECT _model.id FROM %1$s AS _model
-            LEFT JOIN %2$s AS _active ON _active.item_id=_model.id
-                                        AND _active.att_id=?
-                                        AND _active.language=?
-            LEFT JOIN %2$s AS _fallback ON _active.item_id IS NULL
-                                        AND _fallback.item_id=_model.id
-                                        AND _fallback.att_id=?
-                                        AND _fallback.language=?
-            WHERE _model.id IN (%3$s)
-            ORDER BY COALESCE(_active.title, _active.href, _fallback.title, _fallback.href) %4$s,
-                     COALESCE(_active.href, _fallback.href) %4$s',
-            $this->getMetaModel()->getTableName(),
-            $this->getValueTable(),
-            $this->parameterMask($ids),
-            $direction
-        );
+        $statement = $this->connection->createQueryBuilder()
+            ->select('_model.id')
+            ->from($this->getMetaModel()->getTableName(), '_model')
+            ->leftJoin(
+                '_model',
+                $this->getValueTable(),
+                '_active',
+                '_active.item_id=_model.id AND _active.att_id=:att_id AND _active.language=:active'
+            )
+            ->leftJoin(
+                '_model',
+                $this->getValueTable(),
+                '_fallback',
+                'active.item_id IS NULL 
+                AND _fallback.item_id=_model.id 
+                AND _fallback.att_id=:att_id 
+                AND _fallback.language=:fallback'
+            )
+            ->where('_model.id IN (:ids)')
+            ->orderBY('COALESCE(_active.title, _active.href, _fallback.title, _fallback.href)', $direction)
+            ->addOrderBy('COALESCE(_active.href, _fallback.href)', $direction)
+            ->setParameter('att_id', $this->get('id'))
+            ->setParameter('active', $this->getMetaModel()->getActiveLanguage())
+            ->setParameter('fallback', $this->getMetaModel()->getFallbackLanguage())
+            ->setParameter('ids', $ids, Connection::PARAM_STR_ARRAY)
+            ->execute();
 
-        $params[] = $this->get('id');
-        $params[] = $this->getMetaModel()->getActiveLanguage();
-        $params[] = $this->get('id');
-        $params[] = $this->getMetaModel()->getFallbackLanguage();
-        $params   = array_merge($params, $ids);
-        $result   = $this->getMetaModel()->getServiceContainer()->getDatabase()->prepare($sql)->execute($params);
-
-        return $result->fetchEach('id');
+        return $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
     }
 
     /**
@@ -260,29 +256,28 @@ class TranslatedUrl extends TranslatedReference
 
         $this->unsetValueFor(array_keys($values), $language);
 
-        $time   = time();
-        $params = array();
-        foreach ($values as $id => $value) {
-            if (!count(array_filter((array) $value))) {
-                continue;
+        $time = time();
+
+        $this->connection->transactional(
+            function () use ($values, $time, $language) {
+                foreach ($values as $id => $value) {
+                    if (!count(array_filter((array) $value))) {
+                        continue;
+                    }
+
+                    $params = [
+                        'att_id' => $this->get('id'),
+                        'item_id' => $id,
+                        'language' => $language,
+                        'tstamp'   => $time,
+                        'href'     => $value['href'],
+                        'title'    => strlen($value['title']) ? $value['title'] : null
+                    ];
+
+                    $this->connection->insert($this->getValueTable(), $params);
+                }
             }
-            $params[] = $this->get('id');
-            $params[] = $id;
-            $params[] = $language;
-            $params[] = $time;
-            $params[] = $value['href'];
-            $params[] = strlen($value['title']) ? $value['title'] : null;
-        }
-
-        $sql = sprintf(
-            'INSERT INTO %1$s (att_id, item_id, language, tstamp, href, title) VALUES %2$s',
-            $this->getValueTable(),
-            rtrim(str_repeat('(?,?,?,?,?,?),', (count($params) / 6)), ',')
         );
-
-        if ($params) {
-            $this->getMetaModel()->getServiceContainer()->getDatabase()->prepare($sql)->execute($params);
-        }
     }
 
     /**
@@ -296,23 +291,19 @@ class TranslatedUrl extends TranslatedReference
             return array();
         }
 
-        $sql = sprintf(
-            'SELECT item_id AS id, href, title
-            FROM %1$s
-            WHERE att_id=?
-            AND language=?
-            AND item_id IN (%2$s)',
-            $this->getValueTable(),
-            $this->parameterMask($ids)
-        );
+        $statement = $this->connection->createQueryBuilder()
+            ->select('item_id AS id, href, title')
+            ->from($this->getValueTable())
+            ->where('att_id = :att_id')
+            ->andWhere('language = :language')
+            ->andWhere('item_id IN (:ids)')
+            ->setParameter('att_id', $this->get('id'))
+            ->setParameter('language', $language)
+            ->setParameter('ids', $ids, Connection::PARAM_STR_ARRAY)
+            ->execute();
 
-        $params[] = $this->get('id');
-        $params[] = $language;
-        $params   = array_merge($params, $ids);
-
-        $result = $this->getMetaModel()->getServiceContainer()->getDatabase()->prepare($sql)->execute($params);
         $values = array();
-        while ($result->next()) {
+        while ($result = $statement->fetch(\PDO::FETCH_OBJ)) {
             $values[$result->id] = array('href' => $result->href, 'title' => $result->title);
         }
 
@@ -330,19 +321,14 @@ class TranslatedUrl extends TranslatedReference
             return;
         }
 
-        $sql = sprintf(
-            'DELETE FROM %1$s
-            WHERE att_id=?
-            AND language=?
-            AND item_id IN (%2$s)',
-            $this->getValueTable(),
-            $this->parameterMask($ids)
-        );
-
-        $params[] = $this->get('id');
-        $params[] = $language;
-        $params   = array_merge($params, $ids);
-
-        $this->getMetaModel()->getServiceContainer()->getDatabase()->prepare($sql)->execute($params);
+        $this->connection->createQueryBuilder()
+            ->delete($this->getValueTable())
+            ->where('att_id = :att_id')
+            ->andWhere('language = :language')
+            ->andWhere('item_id IN (:ids)')
+            ->setParameter('att_id', $this->get('id'))
+            ->setParameter('language', $language)
+            ->setParameter('ids', $ids, Connection::PARAM_STR_ARRAY)
+            ->execute();
     }
 }
