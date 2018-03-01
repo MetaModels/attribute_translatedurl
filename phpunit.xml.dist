@@ -12,7 +12,7 @@
   >
   <testsuites>
     <testsuite name="MetaModels translatedurl tests">
-      <directory>./tests/MetaModels/</directory>
+      <directory>./tests/</directory>
     </testsuite>
   </testsuites>
 

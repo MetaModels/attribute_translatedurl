@@ -19,15 +19,18 @@
  * @filesource
  */
 
-namespace MetaModels\Test\Attribute\TranslatedUrl;
+namespace MetaModels\AttributeTranslatedUrlBundle\Test\Attribute;
 
-use MetaModels\Attribute\TranslatedUrl\TranslatedUrl;
+use Doctrine\DBAL\Connection;
+use MetaModels\AttributeTranslatedUrlBundle\Attribute\TranslatedUrl;
 use MetaModels\IMetaModel;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Unit tests to test class TranslatedUrl.
  */
-class TranslatedUrlTest extends \PHPUnit_Framework_TestCase
+class TranslatedUrlTest extends TestCase
 {
     /**
      * Mock a MetaModel.
@@ -39,10 +42,9 @@ class TranslatedUrlTest extends \PHPUnit_Framework_TestCase
      */
     protected function mockMetaModel($language, $fallbackLanguage)
     {
-        $metaModel = $this->getMock(
+        $metaModel = $this->getMockForAbstractClass(
             'MetaModels\IMetaModel',
-            array(),
-            array(array())
+            array()
         );
 
         $metaModel
@@ -70,7 +72,35 @@ class TranslatedUrlTest extends \PHPUnit_Framework_TestCase
      */
     public function testInstantiation()
     {
-        $url = new TranslatedUrl($this->mockMetaModel('en', 'en'));
-        $this->assertInstanceOf('MetaModels\Attribute\TranslatedUrl\TranslatedUrl', $url);
+        $url = new TranslatedUrl(
+            $this->mockMetaModel('en', 'en'),
+            [],
+            $this->mockConnection(),
+            $this->mockDispatcher()
+        );
+
+        $this->assertInstanceOf(TranslatedUrl::class, $url);
+    }
+
+    /**
+     * Mock the database connection.
+     *
+     * @return \PHPUnit_Framework_MockObject_MockObject|Connection
+     */
+    private function mockConnection()
+    {
+        return $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
+    /**
+     * Mock event dispatcher.
+     *
+     * @return \PHPUnit\Framework\MockObject\MockObject|EventDispatcherInterface
+     */
+    private function mockDispatcher()
+    {
+        return $this->getMockForAbstractClass(EventDispatcherInterface::class);
     }
 }

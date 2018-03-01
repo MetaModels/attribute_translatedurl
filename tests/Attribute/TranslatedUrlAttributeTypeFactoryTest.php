@@ -19,17 +19,20 @@
  * @filesource
  */
 
-namespace MetaModels\Test\Attribute\TranslatedUrl;
+namespace MetaModels\AttributeTranslatedUrlBundle\Test\Attribute;
 
+use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\IAttributeTypeFactory;
-use MetaModels\Attribute\TranslatedUrl\AttributeTypeFactory;
+use MetaModels\AttributeTranslatedUrlBundle\Attribute\AttributeTypeFactory;
+use MetaModels\AttributeTranslatedUrlBundle\Attribute\TranslatedUrl;
 use MetaModels\IMetaModel;
-use MetaModels\Test\Attribute\AttributeTypeFactoryTest;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Test the attribute factory.
  */
-class TranslatedUrlAttributeTypeFactoryTest extends AttributeTypeFactoryTest
+class TranslatedUrlAttributeTypeFactoryTest extends TestCase
 {
     /**
      * Mock a MetaModel.
@@ -44,10 +47,9 @@ class TranslatedUrlAttributeTypeFactoryTest extends AttributeTypeFactoryTest
      */
     protected function mockMetaModel($tableName, $language, $fallbackLanguage)
     {
-        $metaModel = $this->getMock(
+        $metaModel = $this->getMockForAbstractClass(
             'MetaModels\IMetaModel',
-            array(),
-            array(array())
+            array()
         );
 
         $metaModel
@@ -75,7 +77,7 @@ class TranslatedUrlAttributeTypeFactoryTest extends AttributeTypeFactoryTest
      */
     protected function getAttributeFactories()
     {
-        return array(new AttributeTypeFactory());
+        return array(new AttributeTypeFactory($this->mockConnection(), $this->mockDispatcher()));
     }
 
     /**
@@ -85,17 +87,39 @@ class TranslatedUrlAttributeTypeFactoryTest extends AttributeTypeFactoryTest
      */
     public function testCreateTags()
     {
-        $factory   = new AttributeTypeFactory();
+        $factory   = new AttributeTypeFactory($this->mockConnection(), $this->mockDispatcher());
         $values    = array();
         $attribute = $factory->createInstance(
             $values,
             $this->mockMetaModel('mm_test', 'de', 'en')
         );
 
-        $this->assertInstanceOf('MetaModels\Attribute\TranslatedUrl\TranslatedUrl', $attribute);
+        $this->assertInstanceOf(TranslatedUrl::class, $attribute);
 
         foreach ($values as $key => $value) {
             $this->assertEquals($value, $attribute->get($key), $key);
         }
+    }
+
+    /**
+     * Mock the database connection.
+     *
+     * @return \PHPUnit_Framework_MockObject_MockObject|Connection
+     */
+    private function mockConnection()
+    {
+        return $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
+    /**
+     * Mock event dispatcher.
+     *
+     * @return \PHPUnit\Framework\MockObject\MockObject|EventDispatcherInterface
+     */
+    private function mockDispatcher()
+    {
+        return $this->getMockForAbstractClass(EventDispatcherInterface::class);
     }
 }
