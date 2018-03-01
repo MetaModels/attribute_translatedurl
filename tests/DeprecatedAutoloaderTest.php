@@ -11,7 +11,7 @@
  * This project is provided in good faith and hope to be usable by anyone.
  *
  * @package    MetaModels
- * @subpackage AttributeSelect
+ * @subpackage AttributeTranslatedUrl
  * @author     David Molineus <david.molineus@netzmacht.de>
  * @copyright  2012-2017 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_text/blob/master/LICENSE LGPL-3.0
@@ -28,7 +28,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * This class tests if the deprecated autoloader works.
  *
- * @package MetaModels\AttributeSelectBundle\Test
+ * @package MetaModels\AttributeTranslatedUrlBundle\Test
  */
 class DeprecatedAutoloaderTest extends TestCase
 {
