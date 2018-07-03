@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2016 The MetaModels team.
+ * (c) 2012-2018 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,8 @@
  * @subpackage AttributeTranslatedUrl
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Christopher Boelter <christopher@boelter.eu>
- * @copyright  2012-2016 The MetaModels team.
+ * @author     Sven Baumann <baumann.sv@gmail.com>
+ * @copyright  2012-2018 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
@@ -23,11 +24,12 @@ namespace MetaModels\Test\Attribute\TranslatedUrl;
 
 use MetaModels\Attribute\TranslatedUrl\TranslatedUrl;
 use MetaModels\IMetaModel;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests to test class TranslatedUrl.
  */
-class TranslatedUrlTest extends \PHPUnit_Framework_TestCase
+class TranslatedUrlTest extends TestCase
 {
     /**
      * Mock a MetaModel.
@@ -39,11 +41,7 @@ class TranslatedUrlTest extends \PHPUnit_Framework_TestCase
      */
     protected function mockMetaModel($language, $fallbackLanguage)
     {
-        $metaModel = $this->getMock(
-            'MetaModels\IMetaModel',
-            array(),
-            array(array())
-        );
+        $metaModel = $this->getMockForAbstractClass(IMetaModel::class);
 
         $metaModel
             ->expects($this->any())
@@ -71,6 +69,6 @@ class TranslatedUrlTest extends \PHPUnit_Framework_TestCase
     public function testInstantiation()
     {
         $url = new TranslatedUrl($this->mockMetaModel('en', 'en'));
-        $this->assertInstanceOf('MetaModels\Attribute\TranslatedUrl\TranslatedUrl', $url);
+        $this->assertInstanceOf(TranslatedUrl::class, $url);
     }
 }

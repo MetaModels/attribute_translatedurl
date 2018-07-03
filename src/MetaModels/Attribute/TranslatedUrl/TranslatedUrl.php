@@ -1,10 +1,9 @@
 <?php
 
-
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2016 The MetaModels team.
+ * (c) 2012-2018 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -19,7 +18,7 @@
  * @author     Christopher Boelter <christopher@boelter.eu>
  * @author     Ingolf Steinhardt <info@e-spin.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
- * @copyright  2012-2016 The MetaModels team.
+ * @copyright  2012-2018 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
@@ -52,11 +51,14 @@ class TranslatedUrl extends TranslatedReference
      */
     public function getAttributeSettingNames()
     {
-        return array_merge(parent::getAttributeSettingNames(), array(
-            'no_external_link',
-            'mandatory',
-            'trim_title'
-        ));
+        return \array_merge(
+            parent::getAttributeSettingNames(),
+            [
+                'no_external_link',
+                'mandatory',
+                'trim_title'
+            ]
+        );
     }
 
     /**
@@ -87,14 +89,14 @@ class TranslatedUrl extends TranslatedReference
         if ($this->get('trim_title')) {
             return array('href' => $value);
         } else {
-            return array_combine(array('title', 'href'), $value);
+            return \array_combine(['title', 'href'], $value);
         }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getFieldDefinition($overrides = array())
+    public function getFieldDefinition($overrides = [])
     {
         $arrFieldDef = parent::getFieldDefinition($overrides);
 
@@ -114,7 +116,7 @@ class TranslatedUrl extends TranslatedReference
         $dispatcher = $this->getMetaModel()->getServiceContainer()->getEventDispatcher();
         $dispatcher->addListener(
             ManipulateWidgetEvent::NAME,
-            array(new UrlWizardHandler($this->getMetaModel(), $this->getColName()), 'getWizard')
+            [new UrlWizardHandler($this->getMetaModel(), $this->getColName()), 'getWizard']
         );
 
         return $arrFieldDef;
@@ -126,15 +128,15 @@ class TranslatedUrl extends TranslatedReference
     public function getFilterOptions($ids, $usedOnly, &$count = null)
     {
         // not supported
-        return array();
+        return [];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function searchForInLanguages($pattern, $languages = array())
+    public function searchForInLanguages($pattern, $languages = [])
     {
-        $pattern           = str_replace(array('*', '?'), array('%', '_'), $pattern);
+        $pattern           = \str_replace(['*', '?'], ['%', '_'], $pattern);
         $languageCondition = '';
 
         $languages = (array) $languages;
@@ -142,7 +144,7 @@ class TranslatedUrl extends TranslatedReference
             $languageCondition = 'AND language IN (' . $this->parameterMask($languages) . ')';
         }
 
-        $sql = sprintf(
+        $sql = \sprintf(
             'SELECT DISTINCT item_id AS id FROM %1$s WHERE (title LIKE ? OR href LIKE ?) AND att_id = ?%2$s',
             $this->getValueTable(),
             $languageCondition
@@ -151,7 +153,7 @@ class TranslatedUrl extends TranslatedReference
         $params[] = $pattern;
         $params[] = $pattern;
         $params[] = $this->get('id');
-        $params   = array_merge($params, $languages);
+        $params   = \array_merge($params, $languages);
 
         $result = $this->getMetaModel()->getServiceContainer()->getDatabase()->prepare($sql)->execute($params);
 
@@ -165,7 +167,7 @@ class TranslatedUrl extends TranslatedReference
     {
         $ids = (array) $ids;
 
-        if (count($ids) < 2) {
+        if (\count($ids) < 2) {
             return $ids;
         }
 
@@ -173,7 +175,7 @@ class TranslatedUrl extends TranslatedReference
             $direction = 'ASC';
         }
 
-        $sql = sprintf(
+        $sql = \sprintf(
             'SELECT _model.id FROM %1$s AS _model
             LEFT JOIN %2$s AS _active ON _active.item_id=_model.id
                                         AND _active.att_id=?
@@ -195,7 +197,7 @@ class TranslatedUrl extends TranslatedReference
         $params[] = $this->getMetaModel()->getActiveLanguage();
         $params[] = $this->get('id');
         $params[] = $this->getMetaModel()->getFallbackLanguage();
-        $params   = array_merge($params, $ids);
+        $params   = \array_merge($params, $ids);
         $result   = $this->getMetaModel()->getServiceContainer()->getDatabase()->prepare($sql)->execute($params);
 
         return $result->fetchEach('id');
@@ -211,12 +213,12 @@ class TranslatedUrl extends TranslatedReference
             return;
         }
 
-        $this->unsetValueFor(array_keys($values), $language);
+        $this->unsetValueFor(\array_keys($values), $language);
 
-        $time   = time();
-        $params = array();
+        $time   = \time();
+        $params = [];
         foreach ($values as $id => $value) {
-            if (!count(array_filter((array) $value))) {
+            if (!\count(\array_filter((array) $value))) {
                 continue;
             }
             $params[] = $this->get('id');
@@ -224,13 +226,13 @@ class TranslatedUrl extends TranslatedReference
             $params[] = $language;
             $params[] = $time;
             $params[] = $value['href'];
-            $params[] = strlen($value['title']) ? $value['title'] : null;
+            $params[] = \strlen($value['title']) ? $value['title'] : null;
         }
 
-        $sql = sprintf(
+        $sql = \sprintf(
             'INSERT INTO %1$s (att_id, item_id, language, tstamp, href, title) VALUES %2$s',
             $this->getValueTable(),
-            rtrim(str_repeat('(?,?,?,?,?,?),', (count($params) / 6)), ',')
+            \rtrim(\str_repeat('(?,?,?,?,?,?),', (\count($params) / 6)), ',')
         );
 
         if ($params) {
@@ -246,10 +248,10 @@ class TranslatedUrl extends TranslatedReference
         $ids = (array) $ids;
 
         if (!$ids) {
-            return array();
+            return [];
         }
 
-        $sql = sprintf(
+        $sql = \sprintf(
             'SELECT item_id AS id, href, title
             FROM %1$s
             WHERE att_id=?
@@ -261,12 +263,12 @@ class TranslatedUrl extends TranslatedReference
 
         $params[] = $this->get('id');
         $params[] = $language;
-        $params   = array_merge($params, $ids);
+        $params   = \array_merge($params, $ids);
 
         $result = $this->getMetaModel()->getServiceContainer()->getDatabase()->prepare($sql)->execute($params);
-        $values = array();
+        $values = [];
         while ($result->next()) {
-            $values[$result->id] = array('href' => $result->href, 'title' => $result->title);
+            $values[$result->id] = ['href' => $result->href, 'title' => $result->title];
         }
 
         return $values;
@@ -283,7 +285,7 @@ class TranslatedUrl extends TranslatedReference
             return;
         }
 
-        $sql = sprintf(
+        $sql = \sprintf(
             'DELETE FROM %1$s
             WHERE att_id=?
             AND language=?
@@ -294,7 +296,7 @@ class TranslatedUrl extends TranslatedReference
 
         $params[] = $this->get('id');
         $params[] = $language;
-        $params   = array_merge($params, $ids);
+        $params   = \array_merge($params, $ids);
 
         $this->getMetaModel()->getServiceContainer()->getDatabase()->prepare($sql)->execute($params);
     }
