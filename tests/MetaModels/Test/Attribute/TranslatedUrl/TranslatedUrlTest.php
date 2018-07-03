@@ -24,11 +24,12 @@ namespace MetaModels\Test\Attribute\TranslatedUrl;
 
 use MetaModels\Attribute\TranslatedUrl\TranslatedUrl;
 use MetaModels\IMetaModel;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests to test class TranslatedUrl.
  */
-class TranslatedUrlTest extends \PHPUnit_Framework_TestCase
+class TranslatedUrlTest extends TestCase
 {
     /**
      * Mock a MetaModel.
@@ -40,7 +41,7 @@ class TranslatedUrlTest extends \PHPUnit_Framework_TestCase
      */
     protected function mockMetaModel($language, $fallbackLanguage)
     {
-        $metaModel = $this->getMock(IMetaModel::class, [], [[]]);
+        $metaModel = $this->getMockForAbstractClass(IMetaModel::class);
 
         $metaModel
             ->expects($this->any())
