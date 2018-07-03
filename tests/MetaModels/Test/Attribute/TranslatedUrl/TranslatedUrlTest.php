@@ -40,11 +40,7 @@ class TranslatedUrlTest extends \PHPUnit_Framework_TestCase
      */
     protected function mockMetaModel($language, $fallbackLanguage)
     {
-        $metaModel = $this->getMock(
-            'MetaModels\IMetaModel',
-            [],
-            [[]]
-        );
+        $metaModel = $this->getMock(IMetaModel::class, [], [[]]);
 
         $metaModel
             ->expects($this->any())
@@ -72,6 +68,6 @@ class TranslatedUrlTest extends \PHPUnit_Framework_TestCase
     public function testInstantiation()
     {
         $url = new TranslatedUrl($this->mockMetaModel('en', 'en'));
-        $this->assertInstanceOf('MetaModels\Attribute\TranslatedUrl\TranslatedUrl', $url);
+        $this->assertInstanceOf(TranslatedUrl::class, $url);
     }
 }

@@ -26,6 +26,7 @@ use MetaModels\Attribute\IAttributeTypeFactory;
 use MetaModels\Attribute\TranslatedUrl\AttributeTypeFactory;
 use MetaModels\IMetaModel;
 use MetaModels\Test\Attribute\AttributeTypeFactoryTest;
+use MetaModels\Attribute\TranslatedUrl\TranslatedUrl;
 
 /**
  * Test the attribute factory.
@@ -45,11 +46,7 @@ class TranslatedUrlAttributeTypeFactoryTest extends AttributeTypeFactoryTest
      */
     protected function mockMetaModel($tableName, $language, $fallbackLanguage)
     {
-        $metaModel = $this->getMock(
-            'MetaModels\IMetaModel',
-            [],
-            [[]]
-        );
+        $metaModel = $this->getMock(IMetaModel::class, [], [[]]);
 
         $metaModel
             ->expects($this->any())
@@ -93,7 +90,7 @@ class TranslatedUrlAttributeTypeFactoryTest extends AttributeTypeFactoryTest
             $this->mockMetaModel('mm_test', 'de', 'en')
         );
 
-        $this->assertInstanceOf('MetaModels\Attribute\TranslatedUrl\TranslatedUrl', $attribute);
+        $this->assertInstanceOf(TranslatedUrl::class, $attribute);
 
         foreach ($values as $key => $value) {
             $this->assertEquals($value, $attribute->get($key), $key);
