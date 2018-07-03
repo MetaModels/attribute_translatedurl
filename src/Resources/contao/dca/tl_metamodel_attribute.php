@@ -22,32 +22,26 @@
  * @filesource
  */
 
-$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['translatedurl extends url'] = array();
+$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['translatedurl extends url'] = [];
 
-$GLOBALS['TL_DCA']['tl_metamodel_attribute']['dca_config']['data_provider']['tl_metamodel_translatedurl'] = array
-(
+$GLOBALS['TL_DCA']['tl_metamodel_attribute']['dca_config']['data_provider']['tl_metamodel_translatedurl'] = [
     'source' => 'tl_metamodel_translatedurl'
-);
+];
 
-$GLOBALS['TL_DCA']['tl_metamodel_attribute']['dca_config']['childCondition'][] = array
-(
+$GLOBALS['TL_DCA']['tl_metamodel_attribute']['dca_config']['childCondition'][] = [
     'from'   => 'tl_metamodel_attribute',
     'to'     => 'tl_metamodel_translatedurl',
-    'setOn'  => array
-    (
-        array
-        (
+    'setOn'  => [
+        [
             'to_field'   => 'att_id',
             'from_field' => 'id',
-        ),
-    ),
-    'filter' => array
-    (
-        array
-        (
+        ],
+    ],
+    'filter' => [
+        [
             'local'     => 'att_id',
             'remote'    => 'id',
             'operation' => '=',
-        ),
-    )
-);
+        ],
+    ]
+];

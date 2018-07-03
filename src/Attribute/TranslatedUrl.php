@@ -99,11 +99,14 @@ class TranslatedUrl extends TranslatedReference
      */
     public function getAttributeSettingNames()
     {
-        return array_merge(parent::getAttributeSettingNames(), array(
-            'no_external_link',
-            'mandatory',
-            'trim_title'
-        ));
+        return \array_merge(
+            parent::getAttributeSettingNames(),
+            [
+                'no_external_link',
+                'mandatory',
+                'trim_title'
+            ]
+        );
     }
 
     /**
@@ -122,7 +125,7 @@ class TranslatedUrl extends TranslatedReference
         if ($this->get('trim_title')) {
             return $value['href'];
         } else {
-            return array($value['title'], $value['href']);
+            return [$value['title'], $value['href']];
         }
     }
 
@@ -132,16 +135,16 @@ class TranslatedUrl extends TranslatedReference
     public function widgetToValue($value, $idValue)
     {
         if ($this->get('trim_title')) {
-            return array('href' => $value);
+            return ['href' => $value];
         } else {
-            return array_combine(array('title', 'href'), $value);
+            return \array_combine(['title', 'href'], $value);
         }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getFieldDefinition($overrides = array())
+    public function getFieldDefinition($overrides = [])
     {
         $arrFieldDef = parent::getFieldDefinition($overrides);
 
@@ -160,7 +163,7 @@ class TranslatedUrl extends TranslatedReference
         /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
         $this->eventDispatcher->addListener(
             ManipulateWidgetEvent::NAME,
-            array(new UrlWizardHandler($this->getMetaModel(), $this->getColName()), 'getWizard')
+            [new UrlWizardHandler($this->getMetaModel(), $this->getColName()), 'getWizard']
         );
 
         return $arrFieldDef;
@@ -172,15 +175,15 @@ class TranslatedUrl extends TranslatedReference
     public function getFilterOptions($ids, $usedOnly, &$count = null)
     {
         // not supported
-        return array();
+        return [];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function searchForInLanguages($pattern, $languages = array())
+    public function searchForInLanguages($pattern, $languages = [])
     {
-        $pattern = str_replace(array('*', '?'), array('%', '_'), $pattern);
+        $pattern = \str_replace(['*', '?'], ['%', '_'], $pattern);
         $builder = $this->connection->createQueryBuilder()
             ->select('item_id AS id')
             ->from($this->getValueTable())
@@ -254,14 +257,14 @@ class TranslatedUrl extends TranslatedReference
             return;
         }
 
-        $this->unsetValueFor(array_keys($values), $language);
+        $this->unsetValueFor(\array_keys($values), $language);
 
-        $time = time();
+        $time = \time();
 
         $this->connection->transactional(
             function () use ($values, $time, $language) {
                 foreach ($values as $id => $value) {
-                    if (!count(array_filter((array) $value))) {
+                    if (!\count(\array_filter((array) $value))) {
                         continue;
                     }
 
@@ -271,7 +274,7 @@ class TranslatedUrl extends TranslatedReference
                         'language' => $language,
                         'tstamp'   => $time,
                         'href'     => $value['href'],
-                        'title'    => strlen($value['title']) ? $value['title'] : null
+                        'title'    => \strlen($value['title']) ? $value['title'] : null
                     ];
 
                     $this->connection->insert($this->getValueTable(), $params);
@@ -288,7 +291,7 @@ class TranslatedUrl extends TranslatedReference
         $ids = (array) $ids;
 
         if (!$ids) {
-            return array();
+            return [];
         }
 
         $statement = $this->connection->createQueryBuilder()
@@ -302,9 +305,9 @@ class TranslatedUrl extends TranslatedReference
             ->setParameter('ids', $ids, Connection::PARAM_STR_ARRAY)
             ->execute();
 
-        $values = array();
+        $values = [];
         while ($result = $statement->fetch(\PDO::FETCH_OBJ)) {
-            $values[$result->id] = array('href' => $result->href, 'title' => $result->title);
+            $values[$result->id] = ['href' => $result->href, 'title' => $result->title];
         }
 
         return $values;

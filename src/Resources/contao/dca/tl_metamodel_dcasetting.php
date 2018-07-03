@@ -22,12 +22,11 @@
  * @filesource
  */
 
-$GLOBALS['TL_DCA']['tl_metamodel_dcasetting']['metasubselectpalettes']['attr_id']['translatedurl'] = array
-(
-    'presentation' => array(
+$GLOBALS['TL_DCA']['tl_metamodel_dcasetting']['metasubselectpalettes']['attr_id']['translatedurl'] = [
+    'presentation' => [
         'tl_class',
-    ),
-    'functions'    => array(
+    ],
+    'functions'    => [
         'mandatory',
-    ),
-);
+    ],
+];

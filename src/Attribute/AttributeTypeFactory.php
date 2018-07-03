@@ -13,6 +13,7 @@
  * @package    MetaModels
  * @subpackage AttributeTranslatedUrl
  * @author     David Molineus <david.molineus@netzmacht.de>
+ * @author     Sven Baumann <baumann.sv@gmail.com>
  * @copyright  2012-2018 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0
  * @filesource
@@ -54,7 +55,7 @@ class AttributeTypeFactory extends AbstractAttributeTypeFactory
         parent::__construct();
         $this->typeName  = 'translatedurl';
         $this->typeIcon  = 'bundles/metamodelsattributetranslatedurl/url.png';
-        $this->typeClass = 'MetaModels\Attribute\TranslatedUrl\TranslatedUrl';
+        $this->typeClass = TranslatedUrl::class;
 
         $this->connection      = $connection;
         $this->eventDispatcher = $eventDispatcher;
