@@ -13,9 +13,6 @@
  * @package    MetaModels
  * @subpackage AttributeTranslatedUrl
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @author     Andreas Isaak <info@andreas-isaak.de>
- * @author     Christopher Boelter <christopher@boelter.eu>
- * @author     Sven Baumann <baumann.sv@gmail.com>
  * @copyright  2012-2016 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0
  * @filesource
