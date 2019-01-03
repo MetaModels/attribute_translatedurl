@@ -30,9 +30,6 @@ use MetaModels\DcGeneral\Events\UrlWizardHandler;
 
 /**
  * Handle the translated url attribute.
- *
- * @package    MetaModels
- * @subpackage AttributeTranslatedUrl
  */
 class TranslatedUrl extends TranslatedReference
 {
