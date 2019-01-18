@@ -29,7 +29,7 @@ use Contao\System;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ManipulateWidgetEvent;
 use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\TranslatedReference;
-use MetaModels\AttributeTranslatedUrlBundle\DcGeneral\Events\UrlWizardHandler;
+use MetaModels\AttributeTranslatedUrlBundle\EventListener\UrlWizardHandler;
 use MetaModels\IMetaModel;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
