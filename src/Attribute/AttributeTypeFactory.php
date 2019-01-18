@@ -21,13 +21,13 @@
 namespace MetaModels\AttributeTranslatedUrlBundle\Attribute;
 
 use Doctrine\DBAL\Connection;
-use MetaModels\Attribute\AbstractAttributeTypeFactory;
+use MetaModels\Attribute\IAttributeTypeFactory;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Attribute type factory for translated url attributes.
  */
-class AttributeTypeFactory extends AbstractAttributeTypeFactory
+class AttributeTypeFactory implements IAttributeTypeFactory
 {
     /**
      * Database connection.
@@ -51,13 +51,24 @@ class AttributeTypeFactory extends AbstractAttributeTypeFactory
      */
     public function __construct(Connection $connection, EventDispatcherInterface $eventDispatcher)
     {
-        parent::__construct();
-        $this->typeName  = 'translatedurl';
-        $this->typeIcon  = 'bundles/metamodelsattributetranslatedurl/url.png';
-        $this->typeClass = TranslatedUrl::class;
-
         $this->connection      = $connection;
         $this->eventDispatcher = $eventDispatcher;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getTypeName()
+    {
+        return 'translatedurl';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getTypeIcon()
+    {
+        return 'bundles/metamodelsattributetranslatedurl/url.png';
     }
 
     /**
@@ -66,5 +77,29 @@ class AttributeTypeFactory extends AbstractAttributeTypeFactory
     public function createInstance($information, $metaModel)
     {
         return new TranslatedUrl($metaModel, $information, $this->connection, $this->eventDispatcher);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isTranslatedType()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isSimpleType()
+    {
+        return false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isComplexType()
+    {
+        return true;
     }
 }
