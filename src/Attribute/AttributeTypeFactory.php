@@ -12,7 +12,7 @@
  *
  * @package    MetaModels/attribute_translatedurl
  * @author     David Molineus <david.molineus@netzmacht.de>
- * @author     Sven Baumann <baumann.sv@gmail.com>
+ * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @copyright  2012-2019 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
