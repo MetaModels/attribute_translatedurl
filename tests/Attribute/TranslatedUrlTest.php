@@ -12,44 +12,43 @@
  *
  * @package    MetaModels/attribute_translatedurl
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
+ * @author     Christopher Boelter <christopher@boelter.eu>
  * @author     Sven Baumann <baumann.sv@gmail.com>
+ * @author     David Molineus <david.molineus@netzmacht.de>
  * @copyright  2012-2019 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
 
-namespace MetaModels\Test\Attribute\TranslatedUrl;
+namespace MetaModels\AttributeTranslatedUrlBundle\Test\Attribute;
 
-use MetaModels\Attribute\IAttributeTypeFactory;
-use MetaModels\Attribute\TranslatedUrl\AttributeTypeFactory;
+use Doctrine\DBAL\Connection;
+use MetaModels\AttributeTranslatedUrlBundle\Attribute\TranslatedUrl;
 use MetaModels\IMetaModel;
-use MetaModels\Test\Attribute\AttributeTypeFactoryTest;
-use MetaModels\Attribute\TranslatedUrl\TranslatedUrl;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Test the attribute factory.
+ * Unit tests to test class TranslatedUrl.
  */
-class TranslatedUrlAttributeTypeFactoryTest extends AttributeTypeFactoryTest
+class TranslatedUrlTest extends TestCase
 {
     /**
      * Mock a MetaModel.
      *
-     * @param string $tableName        The table name.
-     *
      * @param string $language         The language.
-     *
      * @param string $fallbackLanguage The fallback language.
      *
      * @return IMetaModel|\PHPUnit_Framework_MockObject_MockObject
      */
-    protected function mockMetaModel($tableName, $language, $fallbackLanguage)
+    protected function mockMetaModel($language, $fallbackLanguage)
     {
         $metaModel = $this->getMockForAbstractClass(IMetaModel::class);
 
         $metaModel
             ->expects($this->any())
             ->method('getTableName')
-            ->will($this->returnValue($tableName));
+            ->will($this->returnValue('mm_unittest'));
 
         $metaModel
             ->expects($this->any())
@@ -65,33 +64,41 @@ class TranslatedUrlAttributeTypeFactoryTest extends AttributeTypeFactoryTest
     }
 
     /**
-     * Override the method to run the tests on the attribute factories to be tested.
-     *
-     * @return IAttributeTypeFactory[]
-     */
-    protected function getAttributeFactories()
-    {
-        return [new AttributeTypeFactory()];
-    }
-
-    /**
-     * Test creation of an translated url attribute.
+     * Test that the attribute can be instantiated.
      *
      * @return void
      */
-    public function testCreateTags()
+    public function testInstantiation()
     {
-        $factory   = new AttributeTypeFactory();
-        $values    = [];
-        $attribute = $factory->createInstance(
-            $values,
-            $this->mockMetaModel('mm_test', 'de', 'en')
+        $url = new TranslatedUrl(
+            $this->mockMetaModel('en', 'en'),
+            [],
+            $this->mockConnection(),
+            $this->mockDispatcher()
         );
 
-        $this->assertInstanceOf(TranslatedUrl::class, $attribute);
+        $this->assertInstanceOf(TranslatedUrl::class, $url);
+    }
 
-        foreach ($values as $key => $value) {
-            $this->assertEquals($value, $attribute->get($key), $key);
-        }
+    /**
+     * Mock the database connection.
+     *
+     * @return \PHPUnit_Framework_MockObject_MockObject|Connection
+     */
+    private function mockConnection()
+    {
+        return $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+    }
+
+    /**
+     * Mock event dispatcher.
+     *
+     * @return \PHPUnit\Framework\MockObject\MockObject|EventDispatcherInterface
+     */
+    private function mockDispatcher()
+    {
+        return $this->getMockForAbstractClass(EventDispatcherInterface::class);
     }
 }

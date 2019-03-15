@@ -14,18 +14,18 @@
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Andreas Isaak <info@andreas-isaak.de>
  * @author     Christopher Boelter <christopher@boelter.eu>
- * @author     Oliver Hoff <oliver@hofff.com>
  * @author     Sven Baumann <baumann.sv@gmail.com>
+ * @author     David Molineus <david.molineus@netzmacht.de>
  * @copyright  2012-2019 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
 
-/**
- * Register the templates
- */
-\Contao\TemplateLoader::addFiles(
-    [
-        'mm_attr_translatedurl' => 'system/modules/metamodelsattribute_translatedurl/templates',
-    ]
-);
+$GLOBALS['TL_DCA']['tl_metamodel_dcasetting']['metasubselectpalettes']['attr_id']['translatedurl'] = [
+    'presentation' => [
+        'tl_class',
+    ],
+    'functions'    => [
+        'mandatory',
+    ],
+];
