@@ -127,11 +127,9 @@ class AllowNullAndIndexMigration extends AbstractMigration
      */
     private function checkIndexExists()
     {
-        if ($this->database->indexExists('att_lang', 'tl_metamodel_translatedurl', true)) {
-            return true;
-        }
+        $indexes = $this->connection->getSchemaManager()->listTableIndexes('tl_metamodel_translatedurl');
 
-        return false;
+        return \array_key_exists('att_lang', $indexes);
     }
 
     /**
