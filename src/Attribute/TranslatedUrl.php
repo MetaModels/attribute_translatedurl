@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2019 The MetaModels team.
+ * (c) 2012-2020 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -18,7 +18,7 @@
  * @author     Ingolf Steinhardt <info@e-spin.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     David Molineus <david.molineus@netzmacht.de>
- * @copyright  2012-2019 The MetaModels team.
+ * @copyright  2012-2020 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -180,17 +180,17 @@ class TranslatedUrl extends TranslatedReference
     {
         $pattern = \str_replace(['*', '?'], ['%', '_'], $pattern);
         $builder = $this->connection->createQueryBuilder()
-            ->select('item_id AS id')
-            ->from($this->getValueTable())
-            ->groupBy('item_id')
-            ->where('(title LIKE :pattern OR href LIKE :pattern)')
-            ->andWhere('att_id = :id')
+            ->select('t.item_id AS id')
+            ->from($this->getValueTable(), 't')
+            ->groupBy('t.item_id')
+            ->where('(t.title LIKE :pattern OR t.href LIKE :pattern)')
+            ->andWhere('t.att_id = :id')
             ->setParameter('pattern', $pattern)
             ->setParameter('id', $this->get('id'));
 
         if ($languages) {
             $builder
-                ->andWhere('language IN :languages')
+                ->andWhere('t.language IN :languages')
                 ->setParameter('languages', $languages, Connection::PARAM_STR_ARRAY);
         }
 
@@ -290,11 +290,11 @@ class TranslatedUrl extends TranslatedReference
         }
 
         $statement = $this->connection->createQueryBuilder()
-            ->select('item_id AS id, href, title')
-            ->from($this->getValueTable())
-            ->where('att_id = :att_id')
-            ->andWhere('language = :language')
-            ->andWhere('item_id IN (:ids)')
+            ->select('t.item_id AS id, t.href, title')
+            ->from($this->getValueTable(), 't')
+            ->where('t.att_id = :att_id')
+            ->andWhere('t.language = :language')
+            ->andWhere('t.item_id IN (:ids)')
             ->setParameter('att_id', $this->get('id'))
             ->setParameter('language', $language)
             ->setParameter('ids', $ids, Connection::PARAM_STR_ARRAY)
@@ -320,10 +320,10 @@ class TranslatedUrl extends TranslatedReference
         }
 
         $this->connection->createQueryBuilder()
-            ->delete($this->getValueTable())
-            ->where('att_id = :att_id')
-            ->andWhere('language = :language')
-            ->andWhere('item_id IN (:ids)')
+            ->delete($this->getValueTable(), 't')
+            ->where('t.att_id = :att_id')
+            ->andWhere('t.language = :language')
+            ->andWhere('t.item_id IN (:ids)')
             ->setParameter('att_id', $this->get('id'))
             ->setParameter('language', $language)
             ->setParameter('ids', $ids, Connection::PARAM_STR_ARRAY)
