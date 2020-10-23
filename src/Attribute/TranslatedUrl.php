@@ -320,10 +320,10 @@ class TranslatedUrl extends TranslatedReference
         }
 
         $this->connection->createQueryBuilder()
-            ->delete($this->getValueTable(), 't')
-            ->where('t.att_id = :att_id')
-            ->andWhere('t.language = :language')
-            ->andWhere('t.item_id IN (:ids)')
+            ->delete($this->getValueTable())
+            ->where($this->getValueTable() . '.att_id = :att_id')
+            ->andWhere($this->getValueTable() . '.language = :language')
+            ->andWhere($this->getValueTable() . '.item_id IN (:ids)')
             ->setParameter('att_id', $this->get('id'))
             ->setParameter('language', $language)
             ->setParameter('ids', $ids, Connection::PARAM_STR_ARRAY)
