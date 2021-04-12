@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2019 The MetaModels team.
+ * (c) 2012-2021 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,7 @@
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     David Molineus <david.molineus@netzmacht.de>
- * @copyright  2012-2019 The MetaModels team.
+ * @copyright  2012-2021 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -26,11 +26,14 @@ use MetaModels\Attribute\IAttributeTypeFactory;
 use MetaModels\AttributeTranslatedUrlBundle\Attribute\AttributeTypeFactory;
 use MetaModels\AttributeTranslatedUrlBundle\Attribute\TranslatedUrl;
 use MetaModels\IMetaModel;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Test the attribute factory.
+ *
+ * @covers \MetaModels\AttributeTranslatedUrlBundle\Attribute\AttributeTypeFactory
  */
 class TranslatedUrlAttributeTypeFactoryTest extends TestCase
 {
@@ -43,26 +46,26 @@ class TranslatedUrlAttributeTypeFactoryTest extends TestCase
      *
      * @param string $fallbackLanguage The fallback language.
      *
-     * @return IMetaModel|\PHPUnit_Framework_MockObject_MockObject
+     * @return IMetaModel|MockObject
      */
     protected function mockMetaModel($tableName, $language, $fallbackLanguage)
     {
         $metaModel = $this->getMockForAbstractClass(IMetaModel::class);
 
         $metaModel
-            ->expects($this->any())
+            ->expects(self::any())
             ->method('getTableName')
-            ->will($this->returnValue($tableName));
+            ->willReturn($tableName);
 
         $metaModel
-            ->expects($this->any())
+            ->expects(self::any())
             ->method('getActiveLanguage')
-            ->will($this->returnValue($language));
+            ->willReturn($language);
 
         $metaModel
-            ->expects($this->any())
+            ->expects(self::any())
             ->method('getFallbackLanguage')
-            ->will($this->returnValue($fallbackLanguage));
+            ->willReturn($fallbackLanguage);
 
         return $metaModel;
     }
@@ -91,17 +94,17 @@ class TranslatedUrlAttributeTypeFactoryTest extends TestCase
             $this->mockMetaModel('mm_test', 'de', 'en')
         );
 
-        $this->assertInstanceOf(TranslatedUrl::class, $attribute);
+        self::assertInstanceOf(TranslatedUrl::class, $attribute);
 
         foreach ($values as $key => $value) {
-            $this->assertEquals($value, $attribute->get($key), $key);
+            self::assertEquals($value, $attribute->get($key), $key);
         }
     }
 
     /**
      * Mock the database connection.
      *
-     * @return \PHPUnit_Framework_MockObject_MockObject|Connection
+     * @return MockObject|Connection
      */
     private function mockConnection()
     {
@@ -113,7 +116,7 @@ class TranslatedUrlAttributeTypeFactoryTest extends TestCase
     /**
      * Mock event dispatcher.
      *
-     * @return \PHPUnit\Framework\MockObject\MockObject|EventDispatcherInterface
+     * @return MockObject|EventDispatcherInterface
      */
     private function mockDispatcher()
     {

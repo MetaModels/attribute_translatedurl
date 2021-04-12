@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2019 The MetaModels team.
+ * (c) 2012-2021 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,7 +15,7 @@
  * @author     Christopher Boelter <christopher@boelter.eu>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     David Molineus <david.molineus@netzmacht.de>
- * @copyright  2012-2019 The MetaModels team.
+ * @copyright  2012-2021 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -25,11 +25,14 @@ namespace MetaModels\AttributeTranslatedUrlBundle\Test\Attribute;
 use Doctrine\DBAL\Connection;
 use MetaModels\AttributeTranslatedUrlBundle\Attribute\TranslatedUrl;
 use MetaModels\IMetaModel;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Unit tests to test class TranslatedUrl.
+ *
+ * @covers \MetaModels\AttributeTranslatedUrlBundle\Attribute\TranslatedUrl
  */
 class TranslatedUrlTest extends TestCase
 {
@@ -39,26 +42,26 @@ class TranslatedUrlTest extends TestCase
      * @param string $language         The language.
      * @param string $fallbackLanguage The fallback language.
      *
-     * @return IMetaModel|\PHPUnit_Framework_MockObject_MockObject
+     * @return IMetaModel|MockObject
      */
     protected function mockMetaModel($language, $fallbackLanguage)
     {
         $metaModel = $this->getMockForAbstractClass(IMetaModel::class);
 
         $metaModel
-            ->expects($this->any())
+            ->expects(self::any())
             ->method('getTableName')
-            ->will($this->returnValue('mm_unittest'));
+            ->willReturn('mm_unittest');
 
         $metaModel
-            ->expects($this->any())
+            ->expects(self::any())
             ->method('getActiveLanguage')
-            ->will($this->returnValue($language));
+            ->willReturn($language);
 
         $metaModel
-            ->expects($this->any())
+            ->expects(self::any())
             ->method('getFallbackLanguage')
-            ->will($this->returnValue($fallbackLanguage));
+            ->willReturn($fallbackLanguage);
 
         return $metaModel;
     }
@@ -77,13 +80,13 @@ class TranslatedUrlTest extends TestCase
             $this->mockDispatcher()
         );
 
-        $this->assertInstanceOf(TranslatedUrl::class, $url);
+        self::assertInstanceOf(TranslatedUrl::class, $url);
     }
 
     /**
      * Mock the database connection.
      *
-     * @return \PHPUnit_Framework_MockObject_MockObject|Connection
+     * @return MockObject|Connection
      */
     private function mockConnection()
     {
@@ -95,7 +98,7 @@ class TranslatedUrlTest extends TestCase
     /**
      * Mock event dispatcher.
      *
-     * @return \PHPUnit\Framework\MockObject\MockObject|EventDispatcherInterface
+     * @return MockObject|EventDispatcherInterface
      */
     private function mockDispatcher()
     {
