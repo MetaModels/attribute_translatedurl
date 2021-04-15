@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2020 The MetaModels team.
+ * (c) 2012-2021 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,8 @@
  * @author     David Molineus <david.molineus@netzmacht.de>
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Ingolf Steinhardt <info@e-spin.de>
- * @copyright  2012-2020 The MetaModels team.
+ * @author     Sven Baumann <baumann.sv@gmail.com>
+ * @copyright  2012-2021 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -85,12 +86,12 @@ class UrlWizardHandler
 
         /** @var GenerateHtmlEvent $imageEvent */
         $imageEvent = $event->getEnvironment()->getEventDispatcher()->dispatch(
-            ContaoEvents::IMAGE_GET_HTML,
             new GenerateHtmlEvent(
                 'pickpage.svg',
                 $translator->translate('pagepicker', 'MSC'),
                 'style="vertical-align:text-bottom;cursor:pointer;width:20px;height:20px;"'
-            )
+            ),
+            ContaoEvents::IMAGE_GET_HTML
         );
 
         $event->getWidget()->wizard = ' <a href="contao/page.php?do=' . Input::get('do') .
