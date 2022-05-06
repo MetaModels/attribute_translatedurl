@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2019 The MetaModels team.
+ * (c) 2012-2022 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -16,9 +16,18 @@
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     David Molineus <david.molineus@netzmacht.de>
- * @copyright  2012-2019 The MetaModels team.
+ * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @copyright  2012-2022 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
 
-$GLOBALS['TL_DCA']['tl_metamodel_rendersetting']['metapalettes']['translatedurl extends url'] = [];
+$GLOBALS['TL_DCA']['tl_metamodel_rendersetting']['metapalettes']['translatedurl extends default'] = [
+    '+advanced' => ['no_external_link'],
+];
+
+$GLOBALS['TL_DCA']['tl_metamodel_rendersetting']['fields']['no_external_link'] = [
+    'label'     => &$GLOBALS['TL_LANG']['tl_metamodel_rendersetting']['no_external_link'],
+    'inputType' => 'checkbox',
+    'sql'       => 'char(1) NOT NULL default \'\'',
+];
