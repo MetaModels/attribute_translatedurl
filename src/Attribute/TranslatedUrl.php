@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2020 The MetaModels team.
+ * (c) 2012-2022 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -18,7 +18,7 @@
  * @author     Ingolf Steinhardt <info@e-spin.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     David Molineus <david.molineus@netzmacht.de>
- * @copyright  2012-2020 The MetaModels team.
+ * @copyright  2012-2022 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -117,6 +117,10 @@ class TranslatedUrl extends TranslatedReference
      */
     public function valueToWidget($value)
     {
+        if (null === $value) {
+            return;
+        }
+
         if ($this->get('trim_title')) {
             return $value['href'];
         } else {
@@ -194,7 +198,7 @@ class TranslatedUrl extends TranslatedReference
                 ->setParameter('languages', $languages, Connection::PARAM_STR_ARRAY);
         }
 
-        return $builder->execute()->fetchAll(\PDO::FETCH_COLUMN, 0);
+        return $builder->executeQuery()->fetchFirstColumn();
     }
 
     /**
@@ -237,9 +241,9 @@ class TranslatedUrl extends TranslatedReference
             ->setParameter('active', $this->getMetaModel()->getActiveLanguage())
             ->setParameter('fallback', $this->getMetaModel()->getFallbackLanguage())
             ->setParameter('ids', $ids, Connection::PARAM_STR_ARRAY)
-            ->execute();
+            ->executeQuery();
 
-        return $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
+        return $statement->fetchFirstColumn();
     }
 
     /**
@@ -298,11 +302,11 @@ class TranslatedUrl extends TranslatedReference
             ->setParameter('att_id', $this->get('id'))
             ->setParameter('language', $language)
             ->setParameter('ids', $ids, Connection::PARAM_STR_ARRAY)
-            ->execute();
+            ->executeQuery();
 
         $values = [];
-        while ($result = $statement->fetch(\PDO::FETCH_OBJ)) {
-            $values[$result->id] = ['href' => $result->href, 'title' => $result->title];
+        while ($result = $statement->fetchAssociative()) {
+            $values[$result['id']] = ['href' => $result['href'], 'title' => $result['title']];
         }
 
         return $values;
