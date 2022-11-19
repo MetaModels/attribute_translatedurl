@@ -11,17 +11,16 @@
  * This project is provided in good faith and hope to be usable by anyone.
  *
  * @package    MetaModels
- * @subpackage AttributeTranslatedUrl
- * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @author     Stefan Heimes <stefan_heimes@hotmail.com>
- * @author     Andreas Isaak <info@andreas-isaak.de>
- * @author     Christopher Boelter <christopher@boelter.eu>
+ * @subpackage AttributeUrl
  * @author     Ingolf Steinhardt <info@e-spin.de>
  * @copyright  2012-2022 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
-$GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['translatedurl'] = 'Translated URL';
 
-$GLOBALS['TL_LANG']['tl_metamodel_attribute']['trim_title'][0] = 'Remove title';
-$GLOBALS['TL_LANG']['tl_metamodel_attribute']['trim_title'][1] = 'If selected, only the link field is used.';
+/**
+ * Fields
+ */
+$GLOBALS['TL_LANG']['tl_metamodel_rendersetting']['no_external_link'][0] = 'Do not open as an new tab';
+$GLOBALS['TL_LANG']['tl_metamodel_rendersetting']['no_external_link'][1] =
+    'If selected, the url does not open an new tab.';

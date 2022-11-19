@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2019 The MetaModels team.
+ * (c) 2012-2021 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,7 +12,8 @@
  *
  * @package    MetaModels/attribute_translatedurl
  * @author     David Molineus <david.molineus@netzmacht.de>
- * @copyright  2012-2019 The MetaModels team.
+ * @author     Sven Baumann <baumann.sv@gmail.com>
+ * @copyright  2012-2021 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -26,6 +27,9 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * This class tests if the deprecated autoloader works.
+ *
+ * @covers \MetaModels\AttributeTranslatedUrlBundle\Attribute\TranslatedUrl
+ * @covers \MetaModels\AttributeTranslatedUrlBundle\Attribute\AttributeTypeFactory
  */
 class DeprecatedAutoloaderTest extends TestCase
 {
@@ -65,11 +69,11 @@ class DeprecatedAutoloaderTest extends TestCase
      */
     public function testDeprecatedClassesAreAliased($oldClass, $newClass)
     {
-        $this->assertTrue(class_exists($oldClass), sprintf('Class select "%s" is not found.', $oldClass));
+        self::assertTrue(class_exists($oldClass), sprintf('Class select "%s" is not found.', $oldClass));
 
         $oldClassReflection = new \ReflectionClass($oldClass);
         $newClassReflection = new \ReflectionClass($newClass);
 
-        $this->assertSame($newClassReflection->getFileName(), $oldClassReflection->getFileName());
+        self::assertSame($newClassReflection->getFileName(), $oldClassReflection->getFileName());
     }
 }
