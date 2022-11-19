@@ -12,7 +12,7 @@
  * Translations are managed automatically using Transifex. To create a new translation
  * or to help to maintain an existing one, please register at transifex.com.
  *
- * Last-updated: 2022-11-19T18:13:11+01:00
+ * Last-updated: 2022-11-19T18:13:15+01:00
  *
  * @copyright 2012-2022 The MetaModels team.
  * @license   https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
@@ -21,6 +21,6 @@
  */
 
 
-$GLOBALS['TL_LANG']['tl_metamodel_attribute']['trim_title']['0'] = 'Удалить название';
-$GLOBALS['TL_LANG']['tl_metamodel_attribute']['trim_title']['1'] = 'Если выбрано, используется только поле ссылка.';
+$GLOBALS['TL_LANG']['tl_metamodel_rendersetting']['no_external_link']['0'] = 'Не открывать в новой вкладке';
+$GLOBALS['TL_LANG']['tl_metamodel_rendersetting']['no_external_link']['1'] = 'Если выбрано, URL не откроет новую вкладку.';
 
