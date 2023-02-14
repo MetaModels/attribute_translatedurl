@@ -1,2 +1,2 @@
 <?php $href = $this->replaceInsertTags($this->raw['href'] ?? ''); ?>
-<span class="url"><a href="<?= $href ?>"<?php if($this->settings->get('no_external_link')): ?> target="_blank"<?php endif; ?>><?= strlen($this->raw['title'] ?? '') ? $this->raw['title'] : $href; ?></a></span>
+<span class="text url"><a href="<?= $href ?>"<?php if($this->settings->get('no_external_link')): ?> target="_blank"<?php endif; ?>><?= strlen($this->raw['title'] ?? '') ? $this->raw['title'] : $href; ?></a></span>
