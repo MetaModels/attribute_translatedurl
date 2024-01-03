@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2022 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -18,7 +18,7 @@
  * @author     Ingolf Steinhardt <info@e-spin.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     David Molineus <david.molineus@netzmacht.de>
- * @copyright  2012-2022 The MetaModels team.
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -27,6 +27,7 @@ namespace MetaModels\AttributeTranslatedUrlBundle\Attribute;
 
 use Contao\System;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ManipulateWidgetEvent;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\TranslatedReference;
 use MetaModels\AttributeTranslatedUrlBundle\EventListener\UrlWizardHandler;
@@ -43,23 +44,20 @@ class TranslatedUrl extends TranslatedReference
      *
      * @var EventDispatcherInterface
      */
-    private $eventDispatcher;
+    private EventDispatcherInterface $eventDispatcher;
 
     /**
      * Instantiate an MetaModel attribute.
      *
      * Note that you should not use this directly but use the factory classes to instantiate attributes.
      *
-     * @param IMetaModel               $objMetaModel    The MetaModel instance this attribute belongs to.
-     *
-     * @param array                    $arrData         The information array, for attribute information, refer to
-     *                                                  documentation of table tl_metamodel_attribute and documentation
-     *                                                  of the certain attribute classes for information what values
-     *                                                  are understood.
-     *
-     * @param Connection               $connection      Database connection.
-     *
-     * @param EventDispatcherInterface $eventDispatcher Event dispatcher.
+     * @param IMetaModel                    $objMetaModel    The MetaModel instance this attribute belongs to.
+     * @param array                         $arrData         The information array, for attribute information, refer to
+     *                                                       documentation of table tl_metamodel_attribute and
+     *                                                       documentation of the certain attribute classes for
+     *                                                       information what values are understood.
+     * @param Connection|null               $connection      Database connection.
+     * @param EventDispatcherInterface|null $eventDispatcher Event dispatcher.
      */
     public function __construct(
         IMetaModel $objMetaModel,
@@ -77,6 +75,7 @@ class TranslatedUrl extends TranslatedReference
             );
             // @codingStandardsIgnoreEnd
             $eventDispatcher = System::getContainer()->get('event_dispatcher');
+            assert($eventDispatcher instanceof EventDispatcherInterface);
         }
         $this->eventDispatcher = $eventDispatcher;
     }
@@ -84,9 +83,9 @@ class TranslatedUrl extends TranslatedReference
     /**
      * {@inheritdoc}
      */
-    public function getFilterUrlValue($value)
+    public function getFilterUrlValue($varValue)
     {
-        return urlencode(serialize($value));
+        return urlencode(serialize($varValue));
     }
 
     /**
@@ -115,37 +114,37 @@ class TranslatedUrl extends TranslatedReference
     /**
      * {@inheritdoc}
      */
-    public function valueToWidget($value)
+    public function valueToWidget($varValue)
     {
-        if (null === $value) {
+        if (null === $varValue) {
             return;
         }
 
         if ($this->get('trim_title')) {
-            return $value['href'];
-        } else {
-            return [$value['title'], $value['href']];
+            return $varValue['href'];
         }
+
+        return [$varValue['title'], $varValue['href']];
     }
 
     /**
      * {@inheritdoc}
      */
-    public function widgetToValue($value, $idValue)
+    public function widgetToValue($varValue, $itemId)
     {
         if ($this->get('trim_title')) {
-            return ['href' => $value];
-        } else {
-            return \array_combine(['title', 'href'], $value);
+            return ['href' => $varValue];
         }
+
+        return \array_combine(['title', 'href'], $varValue);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getFieldDefinition($overrides = [])
+    public function getFieldDefinition($arrOverrides = [])
     {
-        $arrFieldDef = parent::getFieldDefinition($overrides);
+        $arrFieldDef = parent::getFieldDefinition($arrOverrides);
 
         $arrFieldDef['inputType'] = 'text';
         if (!isset($arrFieldDef['eval']['tl_class'])) {
@@ -171,7 +170,7 @@ class TranslatedUrl extends TranslatedReference
     /**
      * {@inheritdoc}
      */
-    public function getFilterOptions($ids, $usedOnly, &$count = null)
+    public function getFilterOptions($idList, $usedOnly, &$arrCount = null)
     {
         // not supported
         return [];
@@ -180,9 +179,9 @@ class TranslatedUrl extends TranslatedReference
     /**
      * {@inheritdoc}
      */
-    public function searchForInLanguages($pattern, $languages = [])
+    public function searchForInLanguages($strPattern, $arrLanguages = [])
     {
-        $pattern = \str_replace(['*', '?'], ['%', '_'], $pattern);
+        $pattern = \str_replace(['*', '?'], ['%', '_'], $strPattern);
         $builder = $this->connection->createQueryBuilder()
             ->select('t.item_id AS id')
             ->from($this->getValueTable(), 't')
@@ -192,10 +191,10 @@ class TranslatedUrl extends TranslatedReference
             ->setParameter('pattern', $pattern)
             ->setParameter('id', $this->get('id'));
 
-        if ($languages) {
+        if ($arrLanguages) {
             $builder
                 ->andWhere('t.language IN :languages')
-                ->setParameter('languages', $languages, Connection::PARAM_STR_ARRAY);
+                ->setParameter('languages', $arrLanguages, ArrayParameterType::STRING);
         }
 
         return $builder->executeQuery()->fetchFirstColumn();
@@ -204,18 +203,17 @@ class TranslatedUrl extends TranslatedReference
     /**
      * {@inheritdoc}
      */
-    public function sortIds($ids, $direction)
+    public function sortIds($idList, $strDirection)
     {
-        $ids = (array) $ids;
-
-        if (count($ids) < 2) {
-            return $ids;
+        if (count($idList) < 2) {
+            return $idList;
         }
 
-        if ($direction !== 'DESC') {
-            $direction = 'ASC';
+        if ($strDirection !== 'DESC') {
+            $strDirection = 'ASC';
         }
 
+        /** @psalm-suppress DeprecatedMethod */
         $statement = $this->connection->createQueryBuilder()
             ->select('_model.id')
             ->from($this->getMetaModel()->getTableName(), '_model')
@@ -229,18 +227,18 @@ class TranslatedUrl extends TranslatedReference
                 '_model',
                 $this->getValueTable(),
                 '_fallback',
-                'active.item_id IS NULL 
-                AND _fallback.item_id=_model.id 
-                AND _fallback.att_id=:att_id 
+                'active.item_id IS NULL
+                AND _fallback.item_id=_model.id
+                AND _fallback.att_id=:att_id
                 AND _fallback.language=:fallback'
             )
             ->where('_model.id IN (:ids)')
-            ->orderBY('COALESCE(_active.title, _active.href, _fallback.title, _fallback.href)', $direction)
-            ->addOrderBy('COALESCE(_active.href, _fallback.href)', $direction)
+            ->orderBY('COALESCE(_active.title, _active.href, _fallback.title, _fallback.href)', $strDirection)
+            ->addOrderBy('COALESCE(_active.href, _fallback.href)', $strDirection)
             ->setParameter('att_id', $this->get('id'))
             ->setParameter('active', $this->getMetaModel()->getActiveLanguage())
             ->setParameter('fallback', $this->getMetaModel()->getFallbackLanguage())
-            ->setParameter('ids', $ids, Connection::PARAM_STR_ARRAY)
+            ->setParameter('ids', $idList, ArrayParameterType::STRING)
             ->executeQuery();
 
         return $statement->fetchFirstColumn();
@@ -249,28 +247,27 @@ class TranslatedUrl extends TranslatedReference
     /**
      * {@inheritdoc}
      */
-    public function setTranslatedDataFor($values, $language)
+    public function setTranslatedDataFor($arrValues, $strLangCode)
     {
-        $values = (array) $values;
-        if (!$values) {
+        if (!$arrValues) {
             return;
         }
 
-        $this->unsetValueFor(\array_keys($values), $language);
+        $this->unsetValueFor(\array_keys($arrValues), $strLangCode);
 
         $time = \time();
 
         $this->connection->transactional(
-            function () use ($values, $time, $language) {
-                foreach ($values as $id => $value) {
+            function () use ($arrValues, $time, $strLangCode) {
+                foreach ($arrValues as $id => $value) {
                     if (!\count(\array_filter((array) $value))) {
                         continue;
                     }
 
                     $params = [
-                        'att_id' => $this->get('id'),
-                        'item_id' => $id,
-                        'language' => $language,
+                        'att_id'   => $this->get('id'),
+                        'item_id'  => $id,
+                        'language' => $strLangCode,
                         'tstamp'   => $time,
                         'href'     => $value['href'],
                         'title'    => \strlen($value['title']) ? $value['title'] : null
@@ -285,11 +282,9 @@ class TranslatedUrl extends TranslatedReference
     /**
      * {@inheritdoc}
      */
-    public function getTranslatedDataFor($ids, $language)
+    public function getTranslatedDataFor($arrIds, $strLangCode)
     {
-        $ids = (array) $ids;
-
-        if (!$ids) {
+        if (!$arrIds) {
             return [];
         }
 
@@ -300,8 +295,8 @@ class TranslatedUrl extends TranslatedReference
             ->andWhere('t.language = :language')
             ->andWhere('t.item_id IN (:ids)')
             ->setParameter('att_id', $this->get('id'))
-            ->setParameter('language', $language)
-            ->setParameter('ids', $ids, Connection::PARAM_STR_ARRAY)
+            ->setParameter('language', $strLangCode)
+            ->setParameter('ids', $arrIds, ArrayParameterType::STRING)
             ->executeQuery();
 
         $values = [];
@@ -315,11 +310,9 @@ class TranslatedUrl extends TranslatedReference
     /**
      * {@inheritdoc}
      */
-    public function unsetValueFor($ids, $language)
+    public function unsetValueFor($arrIds, $strLangCode)
     {
-        $ids = (array) $ids;
-
-        if (!$ids) {
+        if (!$arrIds) {
             return;
         }
 
@@ -329,8 +322,8 @@ class TranslatedUrl extends TranslatedReference
             ->andWhere($this->getValueTable() . '.language = :language')
             ->andWhere($this->getValueTable() . '.item_id IN (:ids)')
             ->setParameter('att_id', $this->get('id'))
-            ->setParameter('language', $language)
-            ->setParameter('ids', $ids, Connection::PARAM_STR_ARRAY)
-            ->execute();
+            ->setParameter('language', $strLangCode)
+            ->setParameter('ids', $arrIds, ArrayParameterType::STRING)
+            ->executeQuery();
     }
 }

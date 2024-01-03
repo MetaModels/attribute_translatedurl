@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2022 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,7 +15,7 @@
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Ingolf Steinhardt <info@e-spin.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
- * @copyright  2012-2022 The MetaModels team.
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -27,7 +27,9 @@ use Contao\StringUtil;
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
 use ContaoCommunityAlliance\Contao\Bindings\Events\Image\GenerateHtmlEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ManipulateWidgetEvent;
+use ContaoCommunityAlliance\Translator\TranslatorInterface;
 use MetaModels\IMetaModel;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * This class adds the file picker wizard to the file picker widgets if necessary.
@@ -69,7 +71,8 @@ class UrlWizardHandler
      */
     public function getWizard(ManipulateWidgetEvent $event)
     {
-        if ($event->getModel()->getProviderName() !== $this->metaModel->getTableName()
+        if (
+            $event->getModel()->getProviderName() !== $this->metaModel->getTableName()
             || $event->getProperty()->getName() !== $this->propertyName
         ) {
             return;
@@ -79,13 +82,17 @@ class UrlWizardHandler
         $model      = $event->getModel();
         $inputId    = $propName . (!$this->metaModel->getAttribute($this->propertyName)->get('trim_title') ? '_1' : '');
         $translator = $event->getEnvironment()->getTranslator();
+        assert($translator instanceof TranslatorInterface);
 
         $this->addStylesheet('metamodelsattribute_url', 'bundles/metamodelsattributeurl/style.css');
 
-        $currentField = \deserialize($model->getProperty($propName), true);
+        $currentField = StringUtil::deserialize($model->getProperty($propName), true);
 
+
+        $dispatcher = $event->getEnvironment()->getEventDispatcher();
+        assert($dispatcher instanceof EventDispatcherInterface);
         /** @var GenerateHtmlEvent $imageEvent */
-        $imageEvent = $event->getEnvironment()->getEventDispatcher()->dispatch(
+        $imageEvent = $dispatcher->dispatch(
             new GenerateHtmlEvent(
                 'pickpage.svg',
                 $translator->translate('pagepicker', 'MSC'),
@@ -99,12 +106,12 @@ class UrlWizardHandler
             '&amp;value=' . \str_replace(array('{{link_url::', '}}'), '', ($currentField[1] ?? ''))
             . '" title="' .
             StringUtil::specialchars($translator->translate('pagepicker', 'MSC')) .
-            '" onclick="Backend.getScrollOffset();'.
+            '" onclick="Backend.getScrollOffset();' .
             'Backend.openModalSelector({\'width\':765,\'title\':\'' .
             StringUtil::specialchars(\str_replace("'", "\\'", $translator->translate('page.0', 'MOD'))) .
             '\',\'url\':this.href,\'id\':\'' . $inputId . '\',\'tag\':\'ctrl_' . $inputId
             . '\',\'self\':this});' .
-            'return false">' . $imageEvent->getHtml() . '</a>';
+            'return false">' . ($imageEvent->getHtml() ?? '') . '</a>';
     }
 
     /**
