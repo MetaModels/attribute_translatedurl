@@ -22,7 +22,6 @@ namespace MetaModels\AttributeTranslatedUrlBundle\Test;
 
 use MetaModels\AttributeTranslatedUrlBundle\Attribute\AttributeTypeFactory;
 use MetaModels\AttributeTranslatedUrlBundle\Attribute\TranslatedUrl;
-
 use PHPUnit\Framework\TestCase;
 
 /**
