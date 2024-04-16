@@ -28,6 +28,7 @@ use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
 use ContaoCommunityAlliance\Contao\Bindings\Events\Image\GenerateHtmlEvent;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ManipulateWidgetEvent;
 use ContaoCommunityAlliance\Translator\TranslatorInterface;
+use MetaModels\Attribute\IAttribute;
 use MetaModels\IMetaModel;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -80,7 +81,9 @@ class UrlWizardHandler
 
         $propName   = $event->getProperty()->getName();
         $model      = $event->getModel();
-        $inputId    = $propName . (!$this->metaModel->getAttribute($this->propertyName)->get('trim_title') ? '_1' : '');
+        $attribute  = $this->metaModel->getAttribute($this->propertyName);
+        assert($attribute instanceof IAttribute);
+        $inputId    = $propName . (!$attribute->get('trim_title') ? '_1' : '');
         $translator = $event->getEnvironment()->getTranslator();
         assert($translator instanceof TranslatorInterface);
 
