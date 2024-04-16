@@ -18,6 +18,7 @@
  * @author     Ingolf Steinhardt <info@e-spin.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     David Molineus <david.molineus@netzmacht.de>
+ * @author     Cliff Parnitzky <github@cliff-parnitzky.de>
  * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
@@ -270,9 +271,12 @@ class TranslatedUrl extends TranslatedReference
                         'item_id'  => $id,
                         'language' => $strLangCode,
                         'tstamp'   => $time,
-                        'href'     => $value['href'],
-                        'title'    => \strlen($value['title']) ? $value['title'] : null
+                        'href'     => $value['href']
                     ];
+
+                    if (!$this->get('trim_title')) {
+                        $params['title'] = \strlen($value['title']) ? $value['title'] : null;
+                    }
 
                     $this->connection->insert($this->getValueTable(), $params);
                 }
