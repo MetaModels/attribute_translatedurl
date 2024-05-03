@@ -262,7 +262,7 @@ class TranslatedUrl extends TranslatedReference
         $this->connection->transactional(
             function () use ($arrValues, $time, $strLangCode) {
                 foreach ($arrValues as $id => $value) {
-                    if (!\count(\array_filter($value))) {
+                    if (!\is_array($value) || !\count(\array_filter($value))) {
                         continue;
                     }
 
