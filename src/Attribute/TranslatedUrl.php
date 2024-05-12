@@ -156,7 +156,7 @@ class TranslatedUrl extends TranslatedReference
         if (!$this->get('trim_title')) {
             $arrFieldDef['eval']['size']      = 2;
             $arrFieldDef['eval']['multiple']  = true;
-            $arrFieldDef['eval']['tl_class'] .= ' metamodelsattribute_url';
+            $arrFieldDef['eval']['tl_class'] .= ' metamodelsattribute_translatedurl';
         }
 
         /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
@@ -262,7 +262,7 @@ class TranslatedUrl extends TranslatedReference
         $this->connection->transactional(
             function () use ($arrValues, $time, $strLangCode) {
                 foreach ($arrValues as $id => $value) {
-                    if (!is_array($value) || !\count(\array_filter($value))) {
+                    if (!\is_array($value) || !\count(\array_filter($value))) {
                         continue;
                     }
 
