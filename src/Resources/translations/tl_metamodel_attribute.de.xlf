@@ -1,0 +1,18 @@
+<?xml version="1.0" ?><xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" datatype="plaintext" original="src/Resources/translations/tl_metamodel_attribute.en.xlf" target-language="de">
+    <body>
+      <trans-unit id="typeOptions.translatedurl" resname="typeOptions.translatedurl">
+        <source>Translated URL</source>
+        <target>Übersetzte URL</target>
+      </trans-unit>
+      <trans-unit id="trim_title.label" resname="trim_title.label">
+        <source>Remove title</source>
+        <target>Titel entfernen</target>
+      </trans-unit>
+      <trans-unit id="trim_title.description" resname="trim_title.description">
+        <source>If selected, only the link field is used.</source>
+        <target>Wenn ausgewählt, wird nur der Link-Eintrag benutzt.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
