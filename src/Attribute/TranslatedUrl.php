@@ -159,12 +159,6 @@ class TranslatedUrl extends TranslatedReference
             $arrFieldDef['eval']['tl_class'] .= ' metamodelsattribute_translatedurl';
         }
 
-        /** @var \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher */
-        $this->eventDispatcher->addListener(
-            ManipulateWidgetEvent::NAME,
-            [new UrlWizardHandler($this->getMetaModel(), $this->getColName()), 'getWizard']
-        );
-
         return $arrFieldDef;
     }
 
@@ -262,7 +256,7 @@ class TranslatedUrl extends TranslatedReference
         $this->connection->transactional(
             function () use ($arrValues, $time, $strLangCode) {
                 foreach ($arrValues as $id => $value) {
-                    if (!\is_array($value) || !\count(\array_filter($value))) {
+                    if ('' === (string) ($value['href'] ?? '')) {
                         continue;
                     }
 
