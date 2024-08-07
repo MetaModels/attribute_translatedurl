@@ -22,6 +22,8 @@ namespace MetaModels\AttributeTranslatedUrlBundle\Attribute;
 
 use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\IAttributeTypeFactory;
+use MetaModels\AttributeTranslatedUrlBundle\EventListener\UrlWizardHandler;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -34,25 +36,37 @@ class AttributeTypeFactory implements IAttributeTypeFactory
      *
      * @var Connection
      */
-    private $connection;
+    private Connection $connection;
 
     /**
      * Event dispatcher.
      *
      * @var EventDispatcherInterface
      */
-    private $eventDispatcher;
+    private EventDispatcherInterface $eventDispatcher;
+
+    /**
+     * The container interface.
+     *
+     * @var ContainerInterface
+     */
+    private ContainerInterface $container;
 
     /**
      * Construct.
      *
      * @param Connection               $connection      Database connection.
      * @param EventDispatcherInterface $eventDispatcher Event dispatcher.
+     * @param ContainerInterface       $container       Container interface.
      */
-    public function __construct(Connection $connection, EventDispatcherInterface $eventDispatcher)
-    {
+    public function __construct(
+        Connection $connection,
+        EventDispatcherInterface $eventDispatcher,
+        ContainerInterface $container
+    ) {
         $this->connection      = $connection;
         $this->eventDispatcher = $eventDispatcher;
+        $this->container       = $container;
     }
 
     /**
@@ -76,7 +90,11 @@ class AttributeTypeFactory implements IAttributeTypeFactory
      */
     public function createInstance($information, $metaModel)
     {
-        return new TranslatedUrl($metaModel, $information, $this->connection, $this->eventDispatcher);
+        $attribute = new TranslatedUrl($metaModel, $information, $this->connection, $this->eventDispatcher);
+
+        $this->container->get(UrlWizardHandler::class)->watch($attribute);
+
+        return $attribute;
     }
 
     /**

@@ -22,14 +22,14 @@
 
 namespace MetaModels\AttributeTranslatedUrlBundle\EventListener;
 
-use Contao\Input;
-use Contao\StringUtil;
+use Contao\CoreBundle\Picker\PickerBuilderInterface;
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
 use ContaoCommunityAlliance\Contao\Bindings\Events\Image\GenerateHtmlEvent;
+use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\ContaoBackendViewTemplate;
 use ContaoCommunityAlliance\DcGeneral\Contao\View\Contao2BackendView\Event\ManipulateWidgetEvent;
+use ContaoCommunityAlliance\DcGeneral\DataDefinition\ContainerInterface;
 use ContaoCommunityAlliance\Translator\TranslatorInterface;
-use MetaModels\Attribute\IAttribute;
-use MetaModels\IMetaModel;
+use MetaModels\AttributeTranslatedUrlBundle\Attribute\TranslatedUrl;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -38,29 +38,30 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class UrlWizardHandler
 {
     /**
-     * The MetaModel instance this handler should react on.
-     *
-     * @var IMetaModel
-     */
-    protected $metaModel;
-
-    /**
      * The name of the attribute of the MetaModel this handler should react on.
      *
-     * @var string
+     * @var array<string, array<string, TranslatedUrl>>
      */
-    protected $propertyName;
+    private array $propertyNames = [];
 
     /**
      * Create a new instance.
-     *
-     * @param IMetaModel $metaModel    The MetaModel instance.
-     * @param string     $propertyName The name of the property.
      */
-    public function __construct($metaModel, $propertyName)
+    public function __construct(
+        private readonly PickerBuilderInterface $pickerBuilder
+    ) {
+    }
+
+    /**
+     * Register an attribute
+     *
+     * @param TranslatedUrl $attribute The attribute.
+     *
+     * @return void
+     */
+    public function watch(TranslatedUrl $attribute)
     {
-        $this->metaModel    = $metaModel;
-        $this->propertyName = $propertyName;
+        $this->propertyNames[$attribute->getMetaModel()->getTableName()][$attribute->getColName()] = $attribute;
     }
 
     /**
@@ -70,51 +71,48 @@ class UrlWizardHandler
      *
      * @return void
      */
-    public function getWizard(ManipulateWidgetEvent $event)
+    public function __invoke(ManipulateWidgetEvent $event)
     {
-        if (
-            $event->getModel()->getProviderName() !== $this->metaModel->getTableName()
-            || $event->getProperty()->getName() !== $this->propertyName
-        ) {
+        $tableName = $event->getModel()->getProviderName();
+        $propName  = $event->getProperty()->getName();
+
+        if (!isset($this->propertyNames[$tableName][$propName])) {
             return;
         }
 
-        $propName   = $event->getProperty()->getName();
-        $model      = $event->getModel();
-        $attribute  = $this->metaModel->getAttribute($this->propertyName);
-        assert($attribute instanceof IAttribute);
+        $attribute = $this->propertyNames[$tableName][$propName];
+
+        $environment = $event->getEnvironment();
+        $dataDefinition = $environment->getDataDefinition();
+        assert($dataDefinition instanceof ContainerInterface);
+
         $inputId    = $propName . (!$attribute->get('trim_title') ? '_1' : '');
-        $translator = $event->getEnvironment()->getTranslator();
+        $translator = $environment->getTranslator();
         assert($translator instanceof TranslatorInterface);
 
         $this->addStylesheet('metamodelsattribute_url', 'bundles/metamodelsattributeurl/style.css');
 
-        $currentField = StringUtil::deserialize($model->getProperty($propName), true);
-
-
         $dispatcher = $event->getEnvironment()->getEventDispatcher();
         assert($dispatcher instanceof EventDispatcherInterface);
-        /** @var GenerateHtmlEvent $imageEvent */
-        $imageEvent = $dispatcher->dispatch(
-            new GenerateHtmlEvent(
-                'pickpage.svg',
-                $translator->translate('pagepicker', 'MSC'),
-                'style="vertical-align:text-bottom;cursor:pointer;width:20px;height:20px;"'
-            ),
-            ContaoEvents::IMAGE_GET_HTML
+
+        $pickerUrl = $this->pickerBuilder->getUrl('cca_link');
+        $urlEvent = new GenerateHtmlEvent(
+            'pickpage.svg',
+            $translator->translate('pagePicker', 'dc-general'),
+            'style="vertical-align:text-bottom;cursor:pointer;width:20px;height:20px;"'
         );
 
-        $event->getWidget()->wizard = ' <a href="contao/page.php?do=' . Input::get('do') .
-            '&amp;table=' . $this->metaModel->getTableName() . '&amp;field=' . $inputId .
-            '&amp;value=' . \str_replace(array('{{link_url::', '}}'), '', ($currentField[1] ?? ''))
-            . '" title="' .
-            StringUtil::specialchars($translator->translate('pagepicker', 'MSC')) .
-            '" onclick="Backend.getScrollOffset();' .
-            'Backend.openModalSelector({\'width\':765,\'title\':\'' .
-            StringUtil::specialchars(\str_replace("'", "\\'", $translator->translate('page.0', 'MOD'))) .
-            '\',\'url\':this.href,\'id\':\'' . $inputId . '\',\'tag\':\'ctrl_' . $inputId
-            . '\',\'self\':this});' .
-            'return false">' . ($imageEvent->getHtml() ?? '') . '</a>';
+        $dispatcher->dispatch($urlEvent, ContaoEvents::IMAGE_GET_HTML);
+
+        $template = new ContaoBackendViewTemplate('dc_general_wizard_link_url_picker');
+        $template
+            ->set('name', $event->getWidget()->name)
+            ->set('popupUrl', $pickerUrl)
+            ->set('html', ' ' . (string) $urlEvent->getHtml())
+            ->set('label', $translator->translate($event->getProperty()->getLabel(), $dataDefinition->getName()))
+            ->set('id', $inputId);
+
+        $event->getWidget()->wizard = $template->parse();
     }
 
     /**
