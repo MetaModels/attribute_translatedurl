@@ -112,6 +112,7 @@ class UrlWizardHandler
             ->set('label', $translator->translate($event->getProperty()->getLabel(), $dataDefinition->getName()))
             ->set('id', $inputId);
 
+        /** @psalm-suppress UndefinedMagicPropertyAssignment */
         $event->getWidget()->wizard = $template->parse();
     }
 
