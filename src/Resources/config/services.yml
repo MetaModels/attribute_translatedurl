@@ -4,11 +4,27 @@ services:
         arguments:
             - '@database_connection'
             - '@event_dispatcher'
+            - '@metamodels.attribute_translatedurl.factory.container'
         tags:
             - { name: metamodels.attribute_factory }
+
+    metamodels.attribute_translatedurl.factory.container:
+      class: Symfony\Component\DependencyInjection\ServiceLocator
+      arguments:
+        -
+          Doctrine\DBAL\Connection: '@database_connection'
+          MetaModels\Helper\TableManipulator: '@metamodels.table_manipulator'
+          MetaModels\AttributeTranslatedUrlBundle\EventListener\UrlWizardHandler: '@MetaModels\AttributeTranslatedUrlBundle\EventListener\UrlWizardHandler'
+      tags: ['container.service_locator']
 
     MetaModels\AttributeTranslatedUrlBundle\Migration\AllowNullAndIndexMigration:
         arguments:
             - '@database_connection'
         tags:
             - name: contao.migration
+
+    MetaModels\AttributeTranslatedUrlBundle\EventListener\UrlWizardHandler:
+      arguments:
+        $pickerBuilder: '@contao.picker.builder'
+      tags:
+        - { name: kernel.event_listener, event: 'dc-general.view.contao2backend.manipulate-widget', method: '__invoke' }

@@ -1,1 +1,1 @@
-<?= $this->replaceInsertTags($this->raw['href']); ?>
+<?= $this->replaceInsertTags($this->raw['href'] ?? ''); ?>

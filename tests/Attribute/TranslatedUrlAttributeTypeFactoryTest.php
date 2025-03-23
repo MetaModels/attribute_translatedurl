@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2021 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,20 +14,24 @@
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     David Molineus <david.molineus@netzmacht.de>
- * @copyright  2012-2021 The MetaModels team.
+ * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
 
 namespace MetaModels\AttributeTranslatedUrlBundle\Test\Attribute;
 
+use Contao\CoreBundle\Picker\PickerBuilderInterface;
 use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\IAttributeTypeFactory;
 use MetaModels\AttributeTranslatedUrlBundle\Attribute\AttributeTypeFactory;
 use MetaModels\AttributeTranslatedUrlBundle\Attribute\TranslatedUrl;
+use MetaModels\AttributeTranslatedUrlBundle\EventListener\UrlWizardHandler;
 use MetaModels\IMetaModel;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -41,9 +45,7 @@ class TranslatedUrlAttributeTypeFactoryTest extends TestCase
      * Mock a MetaModel.
      *
      * @param string $tableName        The table name.
-     *
      * @param string $language         The language.
-     *
      * @param string $fallbackLanguage The fallback language.
      *
      * @return IMetaModel|MockObject
@@ -81,14 +83,19 @@ class TranslatedUrlAttributeTypeFactoryTest extends TestCase
     }
 
     /**
-     * Test creation of an translated url attribute.
+     * Test creation of a translated url attribute.
      *
      * @return void
      */
     public function testCreateTags()
     {
-        $factory   = new AttributeTypeFactory($this->mockConnection(), $this->mockDispatcher());
-        $values    = [];
+        $container     = new Container();
+        $pickerBuilder = $this->getMockForAbstractClass(PickerBuilderInterface::class);
+        $container->set(UrlWizardHandler::class, new UrlWizardHandler($pickerBuilder));
+
+        $factory = new AttributeTypeFactory($this->mockConnection(), $this->mockDispatcher(), $container);
+        $values  = ['colname' => 'test'];
+
         $attribute = $factory->createInstance(
             $values,
             $this->mockMetaModel('mm_test', 'de', 'en')

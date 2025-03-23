@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_translatedurl.
  *
- * (c) 2012-2021 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,7 +13,8 @@
  * @package    MetaModels/attribute_alias
  * @author     Ingolf Steinhardt <info@e-spin.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
- * @copyright  2012-2021 The MetaModels team.
+ * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_translatedurl/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -38,7 +39,7 @@ class AllowNullAndIndexMigration extends AbstractMigration
      *
      * @var Connection
      */
-    private $connection;
+    private Connection $connection;
 
     /**
      * Create a new instance.
@@ -69,7 +70,7 @@ class AllowNullAndIndexMigration extends AbstractMigration
      */
     public function shouldRun(): bool
     {
-        $schemaManager = $this->connection->getSchemaManager();
+        $schemaManager = $this->connection->createSchemaManager();
 
         if (!$schemaManager->tablesExist(['tl_metamodel', 'tl_metamodel_translatedurl'])) {
             return false;
@@ -111,7 +112,7 @@ class AllowNullAndIndexMigration extends AbstractMigration
      */
     private function checkColumnNotNull(): bool
     {
-        $schemaManager = $this->connection->getSchemaManager();
+        $schemaManager = $this->connection->createSchemaManager();
         $columns       = $schemaManager->listTableColumns('tl_metamodel_translatedurl');
 
         if (isset($columns['href']) && $columns['href']->getNotnull()) {
@@ -128,7 +129,7 @@ class AllowNullAndIndexMigration extends AbstractMigration
      */
     private function checkIndexExists()
     {
-        $indexes = $this->connection->getSchemaManager()->listTableIndexes('tl_metamodel_translatedurl');
+        $indexes = $this->connection->createSchemaManager()->listTableIndexes('tl_metamodel_translatedurl');
 
         return \array_key_exists('att_lang', $indexes);
     }
@@ -143,8 +144,8 @@ class AllowNullAndIndexMigration extends AbstractMigration
      */
     private function fixColumnToNull(string $tableName, string $columnName): void
     {
-        $this->connection->query(
-            sprintf('ALTER TABLE %1$s CHANGE %1$s.%2$s %1$s.%2$s varchar(255) NULL', $tableName, $columnName)
+        $this->connection->executeQuery(
+            \sprintf('ALTER TABLE %1$s CHANGE %1$s.%2$s %1$s.%2$s varchar(255) NULL', $tableName, $columnName)
         );
     }
 
@@ -155,10 +156,10 @@ class AllowNullAndIndexMigration extends AbstractMigration
      */
     private function fixIndexes(): void
     {
-        $this->connection->query(
+        $this->connection->executeQuery(
             'ALTER TABLE `tl_metamodel_translatedurl` DROP INDEX `att_lang`;'
         );
-        $this->connection->query(
+        $this->connection->executeQuery(
             'ALTER TABLE `tl_metamodel_translatedurl` ADD KEY `att_id_language` (`att_id`, `language`);'
         );
     }
