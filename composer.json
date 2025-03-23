@@ -46,12 +46,6 @@
     "menatwork/contao-multicolumnwizard-bundle": "^3.6",
     "phpcq/runner-bootstrap": "^1.0@dev"
   },
-  "repositories": [
-    {
-      "type": "composer",
-      "url": "https://packages.cyberspectrum.de/r"
-    }
-  ],
   "autoload": {
     "psr-4": {
       "MetaModels\\AttributeTranslatedUrlBundle\\": "src"
